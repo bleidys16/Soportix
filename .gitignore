@@ -8,6 +8,7 @@ dist/
 # ========================
 # Python / Django backend
 # ========================
+.venv/
 __pycache__/
 *.pyc
 *.pyo
