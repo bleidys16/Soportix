@@ -1,0 +1,31 @@
+# ========================
+# Node / Frontend
+# ========================
+node_modules/
+dist/
+.angular/
+
+# ========================
+# Python / Django backend
+# ========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+*.egg
+.env
+*.sqlite3
+db.sqlite3
+/staticfiles/
+/mediafiles/
+
+# ========================
+# General
+# ========================
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.swo
