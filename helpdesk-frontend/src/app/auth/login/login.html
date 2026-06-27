@@ -1,0 +1,33 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Iniciar Sesión</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Usuario</mat-label>
+          <input matInput formControlName="username" placeholder="Ingrese su usuario" />
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput type="password" formControlName="password" placeholder="Ingrese su contraseña" />
+          <mat-icon matPrefix>lock</mat-icon>
+        </mat-form-field>
+
+        @if (error) {
+          <mat-error class="error-message">{{ error }}</mat-error>
+        }
+
+        <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="loginForm.invalid">
+          Ingresar
+        </button>
+      </form>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/register">¿No tiene cuenta? Regístrese</a>
+    </mat-card-actions>
+  </mat-card>
+</div>
