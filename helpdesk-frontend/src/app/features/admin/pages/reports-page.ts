@@ -1,52 +1,44 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { AuthService } from '../../../core/auth/auth';
 import { TicketService } from '../../../core/services/ticket.service';
 
 @Component({
-  selector: 'app-dashboard-page',
+  selector: 'app-reports-page',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatIconModule, MatButtonModule],
+  imports: [MatCardModule, MatIconModule],
   template: `
-    <h1>Dashboard</h1>
+    <h1>Reportes</h1>
     <div class="stats-grid">
       <mat-card class="stat-card">
         <mat-card-content>
           <mat-icon>confirmation_number</mat-icon>
-          <div class="stat-value">{{ totalTickets }}</div>
+          <div class="stat-value">{{ total }}</div>
           <div class="stat-label">Total Tickets</div>
         </mat-card-content>
       </mat-card>
       <mat-card class="stat-card open">
         <mat-card-content>
           <mat-icon>radio_button_unchecked</mat-icon>
-          <div class="stat-value">{{ openTickets }}</div>
+          <div class="stat-value">{{ open }}</div>
           <div class="stat-label">Abiertos</div>
         </mat-card-content>
       </mat-card>
       <mat-card class="stat-card progress">
         <mat-card-content>
           <mat-icon>pending</mat-icon>
-          <div class="stat-value">{{ inProgressTickets }}</div>
+          <div class="stat-value">{{ inProgress }}</div>
           <div class="stat-label">En Proceso</div>
         </mat-card-content>
       </mat-card>
       <mat-card class="stat-card closed">
         <mat-card-content>
           <mat-icon>check_circle</mat-icon>
-          <div class="stat-value">{{ closedTickets }}</div>
+          <div class="stat-value">{{ closed }}</div>
           <div class="stat-label">Cerrados</div>
         </mat-card-content>
       </mat-card>
     </div>
-    @if (auth.getUserRole() === 'user') {
-      <div class="quick-actions">
-        <a mat-raised-button color="primary" routerLink="/tickets/new">Crear Ticket</a>
-      </div>
-    }
   `,
   styles: [`
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
@@ -57,24 +49,22 @@ import { TicketService } from '../../../core/services/ticket.service';
     .stat-card.open mat-icon { color: #4caf50; }
     .stat-card.progress mat-icon { color: #ff9800; }
     .stat-card.closed mat-icon { color: #9e9e9e; }
-    .quick-actions { margin-top: 2rem; }
   `]
 })
-export class DashboardPage implements OnInit {
-  protected auth = inject(AuthService);
+export class ReportsPage implements OnInit {
   private ticketService = inject(TicketService);
 
-  totalTickets = 0;
-  openTickets = 0;
-  inProgressTickets = 0;
-  closedTickets = 0;
+  total = 0;
+  open = 0;
+  inProgress = 0;
+  closed = 0;
 
   ngOnInit() {
     this.ticketService.getAll().subscribe((tickets) => {
-      this.totalTickets = tickets.length;
-      this.openTickets = tickets.filter((t) => t.status === 'open').length;
-      this.inProgressTickets = tickets.filter((t) => t.status === 'in_progress').length;
-      this.closedTickets = tickets.filter((t) => t.status === 'closed').length;
+      this.total = tickets.length;
+      this.open = tickets.filter((t) => t.status === 'open').length;
+      this.inProgress = tickets.filter((t) => t.status === 'in_progress').length;
+      this.closed = tickets.filter((t) => t.status === 'closed').length;
     });
   }
 }

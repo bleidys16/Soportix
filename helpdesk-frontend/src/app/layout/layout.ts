@@ -38,10 +38,11 @@ export class Layout {
   protected readonly sidenavOpened = signal(true);
 
   protected readonly navItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: ['admin', 'tecnico', 'usuario'] },
-    { label: 'Tickets', icon: 'confirmation_number', route: '/tickets', roles: ['admin', 'tecnico', 'usuario'] },
+    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: ['admin', 'agent', 'user'] },
+    { label: 'Tickets', icon: 'confirmation_number', route: '/tickets', roles: ['admin', 'agent', 'user'] },
     { label: 'Usuarios', icon: 'people', route: '/admin/usuarios', roles: ['admin'] },
-    { label: 'Reportes', icon: 'assessment', route: '/admin/reportes', roles: ['admin', 'tecnico'] },
+    { label: 'Categorías', icon: 'category', route: '/admin/categorias', roles: ['admin'] },
+    { label: 'Reportes', icon: 'assessment', route: '/admin/reportes', roles: ['admin'] },
   ];
 
   protected readonly userRole = computed(() => this.auth.getUserRole());

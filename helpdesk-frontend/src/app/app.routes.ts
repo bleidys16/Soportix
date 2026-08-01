@@ -31,9 +31,9 @@ export const routes: Routes = [
         loadChildren: () => import('./features/admin/admin.routes'),
       },
       {
-        path: 'tecnico',
+        path: 'agent',
         canActivate: [roleGuard],
-        data: { role: 'tecnico' },
+        data: { role: 'agent' },
         loadChildren: () => import('./features/tecnico/tecnico.routes'),
       },
       { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
