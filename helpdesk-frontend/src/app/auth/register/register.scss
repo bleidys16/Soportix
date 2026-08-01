@@ -1,0 +1,23 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--mat-sys-surface-container);
+}
+
+.register-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 1rem;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  display: block;
+  margin-bottom: 1rem;
+}

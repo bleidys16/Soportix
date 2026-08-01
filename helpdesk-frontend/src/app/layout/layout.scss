@@ -1,0 +1,38 @@
+.app-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-info {
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+  text-transform: capitalize;
+}
+
+.sidenav-container {
+  height: 100vh;
+  margin-top: 64px;
+}
+
+.app-sidenav {
+  width: 240px;
+  padding-top: 0.5rem;
+}
+
+.sidenav-content {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px);
+}
+
+.content-wrapper {
+  padding: 1.5rem;
+  flex: 1;
+}
