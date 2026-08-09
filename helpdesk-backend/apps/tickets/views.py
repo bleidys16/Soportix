@@ -1,3 +1,4 @@
+from django.db.models import ProtectedError
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -17,6 +18,16 @@ class CategoryViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            count = self.get_object().tickets.count()
+            return Response(
+                {'detail': f'No se puede eliminar: tiene {count} ticket(s) asociado(s).'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 class TicketViewSet(viewsets.ModelViewSet):
     serializer_class = TicketSerializer

@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/auth/auth';
+import { SubmitErrorStateMatcher } from '../../core/utils/submit-error-state-matcher';
+import { LogoComponent } from '../../core/components/logo/logo';
 
 @Component({
   selector: 'app-register',
@@ -17,8 +18,8 @@ import { AuthService } from '../../core/auth/auth';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
+    LogoComponent,
   ],
   templateUrl: './register.html',
   styleUrl: './register.scss',
@@ -26,6 +27,10 @@ import { AuthService } from '../../core/auth/auth';
 export class Register {
   registerForm: FormGroup;
   error: string | null = null;
+  hidePassword = signal(true);
+  hideConfirmPassword = signal(true);
+  submitted = false;
+  matcher = new SubmitErrorStateMatcher(() => this.submitted);
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +46,7 @@ export class Register {
   }
 
   onSubmit(): void {
+    this.submitted = true;
     if (this.registerForm.invalid) return;
 
     const { confirmPassword, ...data } = this.registerForm.value;

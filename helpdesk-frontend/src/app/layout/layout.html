@@ -1,35 +1,74 @@
-<mat-toolbar color="primary" class="app-toolbar">
-  <button mat-icon-button (click)="sidenavOpened.set(!sidenavOpened())">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span class="app-title">Soportix</span>
+<div class="topbar">
+  @if (isMobile()) {
+    <button mat-icon-button (click)="toggleSidenav()" aria-label="Alternar menú">
+      <mat-icon>menu</mat-icon>
+    </button>
+  }
+
   <span class="spacer"></span>
-  <span class="user-info">{{ userRole() | titlecase }}</span>
-  <button mat-icon-button (click)="logout()" matTooltip="Cerrar sesión">
-    <mat-icon>logout</mat-icon>
+
+  <button mat-icon-button aria-label="Notificaciones">
+    <mat-icon>notifications_none</mat-icon>
   </button>
-</mat-toolbar>
+
+  <div class="user-chip">
+    <div class="avatar">{{ initials() }}</div>
+    <div class="user-text">
+      <span class="user-name">{{ username() }}</span>
+      <span class="user-role">{{ userRole() | titlecase }}</span>
+    </div>
+  </div>
+</div>
 
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
-    mode="side"
+    [mode]="sidenavMode()"
     [opened]="sidenavOpened()"
+    (closedStart)="sidenavOpened.set(false)"
     class="app-sidenav"
   >
-    <mat-nav-list>
-      @for (item of filteredNavItems(); track item.route) {
+    <div class="brand">
+      <app-logo [size]="36" />
+      <div>
+        <div class="brand-name">Soportix</div>
+        <div class="brand-subtitle">Mesa de ayuda</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Operación</div>
+      @for (item of filteredOperationItems(); track item.route) {
         <a
-          mat-list-item
+          class="nav-item"
           [routerLink]="item.route"
-          routerLinkActive
-          #rla="routerLinkActive"
-          [activated]="rla.isActive"
+          routerLinkActive="nav-item-active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/tickets' }"
+          (click)="onNavClick()"
         >
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span matListItemTitle>{{ item.label }}</span>
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
         </a>
       }
-    </mat-nav-list>
+    </div>
+
+    @if (filteredAdminItems().length) {
+      <div class="nav-group">
+        <div class="nav-group-label">Administración</div>
+        @for (item of filteredAdminItems(); track item.route) {
+          <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item-active" (click)="onNavClick()">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </div>
+    }
+
+    <span class="sidenav-spacer"></span>
+
+    <button class="nav-item logout-item" type="button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Cerrar sesión</span>
+    </button>
   </mat-sidenav>
 
   <mat-sidenav-content class="sidenav-content">

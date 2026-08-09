@@ -27,6 +27,11 @@ export interface TicketsTrendPoint {
   count: number;
 }
 
+export interface TicketsTrend {
+  created: TicketsTrendPoint[];
+  closed: TicketsTrendPoint[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private apiUrl = `${environment.apiUrl}/dashboard`;
@@ -45,7 +50,7 @@ export class DashboardService {
     return this.http.get<AgentCount[]>(`${this.apiUrl}/by-agent/`);
   }
 
-  getTicketsTrend(): Observable<TicketsTrendPoint[]> {
-    return this.http.get<TicketsTrendPoint[]>(`${this.apiUrl}/tickets-trend/`);
+  getTicketsTrend(): Observable<TicketsTrend> {
+    return this.http.get<TicketsTrend>(`${this.apiUrl}/tickets-trend/`);
   }
 }

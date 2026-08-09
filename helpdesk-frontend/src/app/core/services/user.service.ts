@@ -11,10 +11,14 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl);
+    return this.http.get<User[]>(`${this.apiUrl}/`);
   }
 
   updateRole(id: number, role: string): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/${id}/`, { role });
+  }
+
+  toggleActive(id: number, isActive: boolean): Observable<User> {
+    return this.http.patch<User>(`${this.apiUrl}/${id}/`, { is_active: isActive });
   }
 }

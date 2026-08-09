@@ -11,7 +11,7 @@ export class CategoryService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.apiUrl);
+    return this.http.get<Category[]>(`${this.apiUrl}/`);
   }
 
   getById(id: number): Observable<Category> {
@@ -19,7 +19,7 @@ export class CategoryService {
   }
 
   create(data: Partial<Category>): Observable<Category> {
-    return this.http.post<Category>(this.apiUrl, data);
+    return this.http.post<Category>(`${this.apiUrl}/`, data);
   }
 
   update(id: number, data: Partial<Category>): Observable<Category> {

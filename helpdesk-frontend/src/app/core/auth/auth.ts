@@ -2,13 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface LoginCredentials {
   username: string;
   password: string;
 }
+
+const KEYS = ['access_token', 'refresh_token', 'role', 'username', 'userId'];
 
 @Injectable({
   providedIn: 'root'
@@ -19,12 +21,18 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  login(credentials: LoginCredentials): Observable<any> {
+  login(credentials: LoginCredentials, remember = true): Observable<any> {
+    const storage = remember ? localStorage : sessionStorage;
     return this.http.post(`${this.apiUrl}/auth/login/`, credentials).pipe(
       tap((response: any) => {
-        localStorage.setItem('access_token', response.access);
-        localStorage.setItem('refresh_token', response.refresh);
-        localStorage.setItem('role', response.role);
+        storage.setItem('access_token', response.access);
+        storage.setItem('refresh_token', response.refresh);
+      }),
+      switchMap(() => this.http.get<{ id: number; role: string; username: string }>(`${this.apiUrl}/auth/me/`)),
+      tap((me) => {
+        storage.setItem('role', me.role);
+        storage.setItem('username', me.username);
+        storage.setItem('userId', String(me.id));
       })
     );
   }
@@ -34,18 +42,32 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('role');
+    KEYS.forEach((k) => {
+      localStorage.removeItem(k);
+      sessionStorage.removeItem(k);
+    });
     this.router.navigate(['/login']);
   }
 
+  private read(key: string): string | null {
+    return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+  }
+
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return this.read('access_token');
   }
 
   getUserRole(): string | null {
-    return localStorage.getItem('role');
+    return this.read('role');
+  }
+
+  getUsername(): string | null {
+    return this.read('username');
+  }
+
+  getUserId(): number | null {
+    const id = this.read('userId');
+    return id ? Number(id) : null;
   }
 
   isAuthenticated(): boolean {

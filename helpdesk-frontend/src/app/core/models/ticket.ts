@@ -7,6 +7,7 @@ export interface Ticket {
   description: string;
   status: TicketStatus;
   priority: TicketPriority;
+  resolution_notes?: string | null;
   created_by: number;
   created_by_username?: string;
   assigned_to?: number | null;

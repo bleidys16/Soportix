@@ -3,4 +3,5 @@ export interface Category {
   name: string;
   description?: string;
   color: string;
+  ticket_count: number;
 }

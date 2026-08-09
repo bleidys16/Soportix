@@ -91,12 +91,22 @@ class DashboardTicketsTrendView(APIView):
         else:
             tickets = Ticket.objects.all()
 
-        rows = (
+        created_rows = (
             tickets
             .annotate(day=TruncDate('created_at'))
             .values('day')
             .annotate(count=Count('id'))
             .order_by('day')
         )
-        data = [{'day': r['day'], 'count': r['count']} for r in rows]
+        closed_rows = (
+            tickets.filter(status='closed')
+            .annotate(day=TruncDate('updated_at'))
+            .values('day')
+            .annotate(count=Count('id'))
+            .order_by('day')
+        )
+        data = {
+            'created': [{'day': r['day'], 'count': r['count']} for r in created_rows],
+            'closed': [{'day': r['day'], 'count': r['count']} for r in closed_rows],
+        }
         return Response(data)

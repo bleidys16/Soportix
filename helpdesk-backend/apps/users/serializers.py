@@ -29,10 +29,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source='profile.role', read_only=True)
+    ticket_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role']
+        fields = ['id', 'username', 'email', 'role', 'is_active', 'ticket_count']
+
+    def get_ticket_count(self, obj):
+        return obj.tickets_created.count()
 
 
 # Personalizar el JWT para incluir el 'role' en el payload 

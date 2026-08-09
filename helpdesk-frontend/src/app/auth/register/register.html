@@ -1,45 +1,93 @@
-<div class="register-container">
-  <mat-card class="register-card">
-    <mat-card-header>
-      <mat-card-title>Crear Cuenta</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+<div class="auth-screen">
+  <div class="side-panel">
+    <div class="brand">
+      <app-logo [size]="44" />
+      <div>
+        <div class="brand-name">Soportix</div>
+        <div class="brand-subtitle">Mesa de ayuda</div>
+      </div>
+    </div>
+
+    <div class="side-content">
+      <h2 class="headline">Cada incidencia, resuelta con orden y trazabilidad.</h2>
+      <ul class="feature-list">
+        <li><mat-icon>check_circle</mat-icon> Tickets con estado, prioridad y categoría</li>
+        <li><mat-icon>check_circle</mat-icon> Bandeja de trabajo para agentes</li>
+        <li><mat-icon>check_circle</mat-icon> Métricas de cierre para administración</li>
+      </ul>
+    </div>
+
+    <p class="side-footer">Soportix · Mesa de ayuda interna · v1.0</p>
+  </div>
+
+  <div class="form-panel">
+    <div class="form-wrap">
+      <h1>Crea tu cuenta</h1>
+      <p class="subtitle">Únete a Soportix y simplifica tu soporte técnico.</p>
+
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Usuario</mat-label>
-          <input matInput formControlName="username" placeholder="Ingrese su usuario" />
-          <mat-icon matPrefix>person</mat-icon>
+        <label class="field-label" for="reg-username">Usuario</label>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input matInput id="reg-username" formControlName="username" placeholder="Elige un nombre de usuario" [errorStateMatcher]="matcher" />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="Ingrese su email" />
-          <mat-icon matPrefix>email</mat-icon>
+        <label class="field-label" for="reg-email">Email</label>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input matInput id="reg-email" type="email" formControlName="email" placeholder="Ingresa tu correo electrónico" [errorStateMatcher]="matcher" />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Contraseña</mat-label>
-          <input matInput type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
-          <mat-icon matPrefix>lock</mat-icon>
+        <label class="field-label" for="reg-password">Contraseña</label>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input
+            matInput
+            id="reg-password"
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Crea una contraseña"
+            [errorStateMatcher]="matcher"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Confirmar Contraseña</mat-label>
-          <input matInput type="password" formControlName="confirmPassword" placeholder="Repita la contraseña" />
-          <mat-icon matPrefix>lock</mat-icon>
+        <label class="field-label" for="reg-confirm-password">Confirmar contraseña</label>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input
+            matInput
+            id="reg-confirm-password"
+            [type]="hideConfirmPassword() ? 'password' : 'text'"
+            formControlName="confirmPassword"
+            placeholder="Confirma tu contraseña"
+            [errorStateMatcher]="matcher"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hideConfirmPassword.set(!hideConfirmPassword())"
+            [attr.aria-label]="hideConfirmPassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+          >
+            <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
         </mat-form-field>
 
         @if (error) {
-          <mat-error class="error-message">{{ error }}</mat-error>
+          <p class="error-message">{{ error }}</p>
         }
 
-        <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="registerForm.invalid">
-          Registrarse
+        <button mat-flat-button type="submit" class="submit-btn full-width" [disabled]="registerForm.invalid">
+          Crear cuenta
         </button>
       </form>
-    </mat-card-content>
-    <mat-card-actions align="end">
-      <a mat-button routerLink="/login">¿Ya tiene cuenta? Inicie sesión</a>
-    </mat-card-actions>
-  </mat-card>
+
+      <p class="bottom-link">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+    </div>
+  </div>
 </div>

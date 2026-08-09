@@ -23,7 +23,7 @@ export class TicketService {
       if (filters.priority) params = params.set('priority', filters.priority);
       if (filters.search) params = params.set('search', filters.search);
     }
-    return this.http.get<Ticket[]>(this.apiUrl, { params });
+    return this.http.get<Ticket[]>(`${this.apiUrl}/`, { params });
   }
 
   getById(id: number): Observable<Ticket> {
@@ -31,11 +31,11 @@ export class TicketService {
   }
 
   create(data: Partial<Ticket>): Observable<Ticket> {
-    return this.http.post<Ticket>(this.apiUrl, data);
+    return this.http.post<Ticket>(`${this.apiUrl}/`, data);
   }
 
   update(id: number, data: Partial<Ticket>): Observable<Ticket> {
-    return this.http.put<Ticket>(`${this.apiUrl}/${id}/`, data);
+    return this.http.patch<Ticket>(`${this.apiUrl}/${id}/`, data);
   }
 
   delete(id: number): Observable<void> {

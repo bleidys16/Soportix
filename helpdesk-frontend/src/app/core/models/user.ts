@@ -3,6 +3,8 @@ export interface User {
   username: string;
   email: string;
   role: 'admin' | 'agent' | 'user';
+  is_active: boolean;
+  ticket_count: number;
 }
 
 export interface UserProfile {

@@ -10,13 +10,66 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$cyan-palette,
+        tertiary: mat.$green-palette,
       ),
-      typography: Roboto,
+      typography: Geist,
       density: 0,
     )
   );
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 24;
+}
+
+:root {
+  // Marca (paleta "Ocean Eyes")
+  --sx-primary: #0d454e;
+  --sx-primary-hover: #051d25;
+  --sx-accent: #70a1a9;
+  --sx-accent-pale: #a9c7ce;
+  --sx-sidebar-bg: #051d25;
+  --sx-page-bg: #f4f7f8;
+  --sx-card-bg: #ffffff;
+  --sx-border: #e0e7e8;
+  --sx-text-primary: #051d25;
+  --sx-text-secondary: #4b6a70;
+  --sx-text-muted: #8aa6ab;
+
+  // Forma
+  --sx-radius-card: 16px;
+  --sx-radius-control: 10px;
+  --sx-shadow-card: 0 10px 40px rgba(15, 23, 42, 0.06);
+
+  // Estado de ticket
+  --sx-status-open-bg: #e8f5e9;
+  --sx-status-open-fg: #2e7d32;
+  --sx-status-progress-bg: #fff3e0;
+  --sx-status-progress-fg: #e65100;
+  --sx-status-closed-bg: #f1f2f4;
+  --sx-status-closed-fg: #55596b;
+
+  // Prioridad de ticket
+  --sx-priority-low-bg: #e8f5e9;
+  --sx-priority-low-fg: #2e7d32;
+  --sx-priority-medium-bg: #fff3e0;
+  --sx-priority-medium-fg: #e65100;
+  --sx-priority-high-bg: #fbe9e7;
+  --sx-priority-high-fg: #c62828;
 }
 
 body {
@@ -31,9 +84,67 @@ body {
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
+  font-family: 'Geist', 'Roboto', sans-serif;
 
   // Reset the user agent margin.
   margin: 0;
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
+
+// Micro-interacciones globales: tarjetas y filas con una elevación/realce sutil al pasar el mouse.
+.sx-card {
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  // Si el contenido (p.ej. una tabla ancha) no cabe, que la tarjeta scrollee en vez de romper el layout.
+  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .stats-grid, .charts-grid, .bottom-grid, .create-grid, .category-grid, .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+table.mat-mdc-table .mat-mdc-row,
+.activity-row,
+.nav-item {
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sx-badge,
+.status-badge,
+.priority-btn {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+@keyframes sx-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+router-outlet + * {
+  animation: sx-fade-in 0.25s ease;
+}
+
+// Botones primarios (fondo --sx-primary): leve elevación al pasar el mouse, feedback al hacer clic.
+.submit-btn,
+.new-ticket-btn,
+.send-btn,
+.export-btn {
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease !important;
+}
+
+.submit-btn:hover:not(:disabled),
+.new-ticket-btn:hover:not(:disabled),
+.send-btn:hover:not(:disabled),
+.export-btn:hover:not(:disabled) {
+  background: var(--sx-primary-hover) !important;
+  box-shadow: 0 6px 16px rgba(13, 69, 78, 0.32);
+}
+
+.submit-btn:active:not(:disabled),
+.new-ticket-btn:active:not(:disabled),
+.send-btn:active:not(:disabled),
+.export-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}

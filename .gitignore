@@ -24,6 +24,13 @@ db.sqlite3
 /mediafiles/
 
 # ========================
+# Editors / local tooling
+# ========================
+.idea/
+.vscode/
+.claude/
+
+# ========================
 # General
 # ========================
 .DS_Store

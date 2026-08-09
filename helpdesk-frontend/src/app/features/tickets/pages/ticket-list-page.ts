@@ -14,6 +14,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TicketService, TicketFilters } from '../../../core/services/ticket.service';
 import { Ticket, TicketStatus, TicketPriority } from '../../../core/models/ticket';
 import { AuthService } from '../../../core/auth/auth';
+import { StatusBadgeComponent } from '../../../core/components/status-badge/status-badge';
+import { PriorityTagComponent } from '../../../core/components/priority-tag/priority-tag';
 
 @Component({
   selector: 'app-ticket-list-page',
@@ -22,21 +24,25 @@ import { AuthService } from '../../../core/auth/auth';
     DatePipe, TitleCasePipe, FormsModule, RouterLink,
     MatTableModule, MatFormFieldModule, MatInputModule, MatSelectModule,
     MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule, MatTooltipModule,
+    StatusBadgeComponent, PriorityTagComponent,
   ],
   templateUrl: './ticket-list-page.html',
   styles: [`
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .page-header h1 { margin: 0; font-size: 1.5rem; font-weight: 500; color: var(--sx-text-primary); }
+    .page-subtitle { margin: 4px 0 0; color: var(--sx-text-secondary); font-size: 0.875rem; }
+    .new-ticket-btn { background: var(--sx-primary) !important; color: #fff !important; border-radius: var(--sx-radius-control); }
+
+    .sx-card { background: var(--sx-card-bg); border-radius: var(--sx-radius-card); box-shadow: var(--sx-shadow-card); padding: 1.25rem; box-sizing: border-box; }
+
     .filters { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .filters mat-form-field { min-width: 150px; }
     .filters .search-field { flex: 1; min-width: 200px; }
     table { width: 100%; }
-    .chip { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; text-transform: capitalize; }
-    .chip-open { background: #e8f5e9; color: #2e7d32; }
-    .chip-in_progress { background: #fff3e0; color: #e65100; }
-    .chip-closed { background: #f5f5f5; color: #616161; }
-    .chip-low { background: #e8f5e9; color: #2e7d32; }
-    .chip-medium { background: #fff3e0; color: #e65100; }
-    .chip-high { background: #fbe9e7; color: #c62828; }
+    .title-link { color: var(--sx-primary); text-decoration: none; font-weight: 500; }
+    .title-link:hover { text-decoration: underline; }
+    .creator-cell { display: flex; align-items: center; gap: 8px; }
+    .mini-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--sx-primary); color: #fff; font-size: 0.625rem; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .spinner { display: flex; justify-content: center; padding: 3rem; }
   `]
 })
@@ -55,6 +61,13 @@ export class TicketListPage implements OnInit {
 
   ngOnInit() {
     this.loadTickets();
+  }
+
+  pageTitle(): string {
+    const role = this.auth.getUserRole();
+    if (role === 'agent') return 'Todos los tickets';
+    if (role === 'admin') return 'Tickets — vista completa';
+    return 'Mis tickets';
   }
 
   loadTickets() {

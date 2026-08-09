@@ -1,33 +1,78 @@
-<div class="login-container">
-  <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title>Iniciar Sesión</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+<div class="auth-screen">
+  <div class="side-panel">
+    <div class="brand">
+      <app-logo [size]="44" />
+      <div>
+        <div class="brand-name">Soportix</div>
+        <div class="brand-subtitle">Mesa de ayuda</div>
+      </div>
+    </div>
+
+    <div class="side-content">
+      <h2 class="headline">Cada incidencia, resuelta con orden y trazabilidad.</h2>
+      <ul class="feature-list">
+        <li><mat-icon>check_circle</mat-icon> Tickets con estado, prioridad y categoría</li>
+        <li><mat-icon>check_circle</mat-icon> Bandeja de trabajo para agentes</li>
+        <li><mat-icon>check_circle</mat-icon> Métricas de cierre para administración</li>
+      </ul>
+    </div>
+
+    <p class="side-footer">Soportix · Mesa de ayuda interna · v1.0</p>
+  </div>
+
+  <div class="form-panel">
+    <div class="form-wrap">
+      <h1>Inicia sesión</h1>
+      <p class="subtitle">Ingresa con tu cuenta corporativa para continuar.</p>
+
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Usuario</mat-label>
-          <input matInput formControlName="username" placeholder="Ingrese su usuario" />
-          <mat-icon matPrefix>person</mat-icon>
+        <label class="field-label" for="login-username">Usuario</label>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input
+            matInput
+            id="login-username"
+            formControlName="username"
+            placeholder="Ingresa tu usuario"
+            [errorStateMatcher]="matcher"
+          />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Contraseña</mat-label>
-          <input matInput type="password" formControlName="password" placeholder="Ingrese su contraseña" />
-          <mat-icon matPrefix>lock</mat-icon>
+        <label class="field-label" for="login-password">Contraseña</label>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <input
+            matInput
+            id="login-password"
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Ingresa tu contraseña"
+            [errorStateMatcher]="matcher"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
         </mat-form-field>
+
+        <div class="options-row">
+          <mat-checkbox formControlName="remember">Recordarme</mat-checkbox>
+          <button type="button" class="link-btn" (click)="$event.preventDefault()">¿Olvidaste tu contraseña?</button>
+        </div>
 
         @if (error) {
-          <mat-error class="error-message">{{ error }}</mat-error>
+          <p class="error-message">{{ error }}</p>
         }
 
-        <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="loginForm.invalid">
-          Ingresar
+        <button mat-flat-button type="submit" class="submit-btn full-width" [disabled]="loginForm.invalid">
+          Acceder
         </button>
       </form>
-    </mat-card-content>
-    <mat-card-actions align="end">
-      <a mat-button routerLink="/register">¿No tiene cuenta? Regístrese</a>
-    </mat-card-actions>
-  </mat-card>
+
+      <p class="bottom-link">¿No tienes cuenta? <a routerLink="/register">Crear cuenta</a></p>
+    </div>
+  </div>
 </div>

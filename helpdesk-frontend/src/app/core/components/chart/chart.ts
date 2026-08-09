@@ -23,6 +23,7 @@ export class ChartComponent implements AfterViewInit, OnChanges {
   @Input() label = '';
   @Input() colors: string[] = [];
   @Input() horizontal = false;
+  @Input() datasets: { label: string; data: number[]; color: string }[] | null = null;
 
   private chart: Chart | null = null;
 
@@ -50,7 +51,7 @@ export class ChartComponent implements AfterViewInit, OnChanges {
       indexAxis: this.horizontal ? 'y' : 'x',
       plugins: {
         legend: {
-          display: this.type === 'doughnut',
+          display: this.type === 'doughnut' || !!this.datasets?.length,
           position: 'bottom',
         },
       },
@@ -68,6 +69,20 @@ export class ChartComponent implements AfterViewInit, OnChanges {
   }
 
   private buildData(): ChartData {
+    if ((this.type === 'bar' || this.type === 'line') && this.datasets?.length) {
+      return {
+        labels: this.labels,
+        datasets: this.datasets.map((ds) => ({
+          label: ds.label,
+          data: ds.data,
+          backgroundColor: ds.color,
+          borderColor: ds.color,
+          borderWidth: 1,
+          ...(this.type === 'line' ? { tension: 0.3, fill: false } : {}),
+        })),
+      };
+    }
+
     if (this.type === 'bar' || this.type === 'line') {
       return {
         labels: this.labels,

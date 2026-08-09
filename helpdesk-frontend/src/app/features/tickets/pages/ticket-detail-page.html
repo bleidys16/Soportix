@@ -4,64 +4,46 @@
   @if (loading()) {
     <div class="spinner"><mat-spinner diameter="40" /></div>
   } @else if (ticket(); as t) {
-    <mat-card>
-      <mat-card-content>
-        <div class="ticket-header">
-          <h1>#{{ t.id }} - {{ t.title }}</h1>
-          <div style="display:flex;gap:0.5rem">
-            <span class="chip chip-{{ t.status }}">{{ statusLabel[t.status] }}</span>
-            <span class="chip chip-{{ t.priority }}">{{ t.priority | titlecase }}</span>
+    <div class="detail-grid">
+      <div class="main-column">
+        <div class="sx-card">
+          <div class="ticket-header">
+            <h1>#{{ t.id }} - {{ t.title }}</h1>
+            <div style="display:flex;gap:0.5rem">
+              <app-status-badge [status]="t.status" />
+              <app-priority-tag [priority]="t.priority" />
+            </div>
           </div>
-        </div>
 
-        <div class="meta">
-          <span class="meta-item"><mat-icon font-size="small">person</mat-icon> {{ t.created_by_username }}</span>
-          <span class="meta-item"><mat-icon font-size="small">category</mat-icon> {{ t.category_name }}</span>
-          @if (t.assigned_to_username) {
-            <span class="meta-item"><mat-icon font-size="small">assignment_ind</mat-icon> {{ t.assigned_to_username }}</span>
+          <p class="description">{{ t.description }}</p>
+
+          @if (t.status === 'closed' && t.resolution_notes) {
+            <div class="resolution-card">
+              <h3><mat-icon>check_circle</mat-icon> Solución</h3>
+              <p>{{ t.resolution_notes }}</p>
+            </div>
           }
-          <span class="meta-item"><mat-icon font-size="small">calendar_today</mat-icon> {{ t.created_at | date:'medium' }}</span>
-          <span class="meta-item"><mat-icon font-size="small">update</mat-icon> {{ t.updated_at | date:'medium' }}</span>
         </div>
 
-        <mat-divider />
+        <div class="sx-card comments-card">
+          <h2>Conversación ({{ comments().length }})</h2>
 
-        <div class="description-card">
-          <h3>Descripción</h3>
-          <p>{{ t.description }}</p>
-        </div>
-
-        @if (auth.getUserRole() === 'agent' || auth.getUserRole() === 'admin') {
-          <mat-divider />
-          <div class="role-actions">
-            <mat-form-field class="status-select" appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Cambiar Estado</mat-label>
-              <mat-select [value]="t.status" (selectionChange)="changeStatus($event.value)">
-                @for (s of statuses; track s) {
-                  <mat-option [value]="s">{{ statusLabel[s] }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        }
-      </mat-card-content>
-    </mat-card>
-
-    <div class="comments-section">
-      <h2>Comentarios ({{ comments().length }})</h2>
-      <mat-card>
-        <mat-card-content>
           @for (c of comments(); track c.id) {
             <div class="comment">
-              <div class="comment-header">
-                <strong>{{ c.author_username }}</strong>
-                <span>{{ c.created_at | date:'medium' }}</span>
+              <div class="comment-avatar">{{ (c.author_username || '?').slice(0, 2).toUpperCase() }}</div>
+              <div class="comment-body-wrap">
+                <div class="comment-header">
+                  <strong>{{ c.author_username }}</strong>
+                  @if (c.author_role) {
+                    <span class="role-chip">{{ roleLabel[c.author_role] || c.author_role }}</span>
+                  }
+                  <span class="comment-date">{{ c.created_at | date:'short' }}</span>
+                </div>
+                <div class="comment-body">{{ c.body }}</div>
               </div>
-              <div class="comment-body">{{ c.body }}</div>
             </div>
-            @if (!$last) { <mat-divider /> }
           } @empty {
-            <p style="color:var(--mat-sys-on-surface-variant);">Sin comentarios aún.</p>
+            <p class="empty-hint">Sin comentarios aún.</p>
           }
 
           <div class="new-comment">
@@ -69,10 +51,70 @@
               <mat-label>Agregar comentario</mat-label>
               <textarea matInput [(ngModel)]="newCommentBody" rows="2" placeholder="Escriba un comentario..."></textarea>
             </mat-form-field>
-            <button mat-raised-button color="primary" (click)="addComment()" [disabled]="!newCommentBody.trim()">Enviar</button>
+            <button mat-flat-button class="send-btn" (click)="addComment()" [disabled]="!newCommentBody.trim()">Enviar</button>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
+
+      <div class="side-column">
+        <div class="sx-card details-card">
+          <h3>Detalles</h3>
+
+          @if (auth.getUserRole() === 'agent' || auth.getUserRole() === 'admin') {
+            <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+              <mat-label>Estado</mat-label>
+              <mat-select [value]="t.status" (selectionChange)="changeStatus($event.value)">
+                @for (s of statuses; track s) {
+                  <mat-option [value]="s">{{ statusLabel[s] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            @if (closingTicket()) {
+              <div class="close-ticket-form">
+                <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                  <mat-label>Nota de resolución</mat-label>
+                  <textarea
+                    matInput
+                    [(ngModel)]="resolutionNotes"
+                    rows="3"
+                    placeholder="Describe cómo se resolvió este ticket..."
+                  ></textarea>
+                </mat-form-field>
+                @if (closeError) {
+                  <p class="error-message">{{ closeError }}</p>
+                }
+                <div class="close-actions">
+                  <button mat-button type="button" (click)="cancelClose()">Cancelar</button>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="button"
+                    (click)="confirmClose()"
+                    [disabled]="!resolutionNotes.trim()"
+                  >
+                    Confirmar cierre
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (t.assigned_to !== auth.getUserId()) {
+              <button mat-stroked-button class="assign-btn" type="button" (click)="assignToMe()">
+                <mat-icon>assignment_ind</mat-icon> Asignarme
+              </button>
+            }
+          }
+
+          <dl class="detail-list">
+            <div><dt>Creado por</dt><dd>{{ t.created_by_username }}</dd></div>
+            <div><dt>Asignado a</dt><dd>{{ t.assigned_to_username || 'Sin asignar' }}</dd></div>
+            <div><dt>Categoría</dt><dd>{{ t.category_name }}</dd></div>
+            <div><dt>Creado</dt><dd>{{ t.created_at | date:'medium' }}</dd></div>
+            <div><dt>Última actividad</dt><dd>{{ t.updated_at | date:'medium' }}</dd></div>
+          </dl>
+        </div>
+      </div>
     </div>
   }
 </div>

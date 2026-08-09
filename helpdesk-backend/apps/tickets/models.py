@@ -31,6 +31,7 @@ class Ticket(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
+    resolution_notes = models.TextField(blank=True, null=True)
 
     # Relaciones
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets_created')
