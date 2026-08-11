@@ -9,7 +9,7 @@ import { errorInterceptor } from './core/auth/error-interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor])),
+    provideHttpClient(withInterceptors([errorInterceptor, jwtInterceptor])),
     provideAnimationsAsync(),
   ]
 };

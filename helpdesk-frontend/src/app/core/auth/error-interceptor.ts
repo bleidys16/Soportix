@@ -8,8 +8,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error) => {
-      const msg = error.error?.detail || error.error?.message || error.statusText || 'Error inesperado';
-      snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'error-snackbar' });
+      // Los 401 los maneja jwtInterceptor (refresco de token o logout); no duplicar el aviso aquí.
+      if (error?.status !== 401) {
+        const msg = error.error?.detail || error.error?.message || error.statusText || 'Error inesperado';
+        snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'error-snackbar' });
+      }
       return throwError(() => error);
     })
   );

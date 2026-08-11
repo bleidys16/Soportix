@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface LoginCredentials {
@@ -39,6 +39,18 @@ export class AuthService {
 
   register(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/register/`, data);
+  }
+
+  refreshAccessToken(): Observable<string> {
+    const refresh = this.read('refresh_token');
+    if (!refresh) {
+      return throwError(() => new Error('No hay refresh token disponible.'));
+    }
+    const storage = localStorage.getItem('access_token') ? localStorage : sessionStorage;
+    return this.http.post<{ access: string }>(`${this.apiUrl}/auth/token/refresh/`, { refresh }).pipe(
+      tap((res) => storage.setItem('access_token', res.access)),
+      map((res) => res.access)
+    );
   }
 
   logout(): void {
