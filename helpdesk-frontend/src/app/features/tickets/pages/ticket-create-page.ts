@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TicketService } from '../../../core/services/ticket.service';
 import { CategoryService } from '../../../core/services/category.service';
+import { AuthService } from '../../../core/auth/auth';
 import { Category } from '../../../core/models/category';
 import { TicketPriority } from '../../../core/models/ticket';
 
@@ -123,6 +124,7 @@ export class TicketCreatePage implements OnInit {
   private router = inject(Router);
   private ticketService = inject(TicketService);
   private categoryService = inject(CategoryService);
+  private auth = inject(AuthService);
 
   form: FormGroup;
   categories: Category[] = [];
@@ -137,6 +139,11 @@ export class TicketCreatePage implements OnInit {
   }
 
   ngOnInit() {
+    // Los administradores no pueden crear tickets; redirigir a lista
+    if (this.auth.getUserRole() === 'admin') {
+      this.router.navigate(['/tickets']);
+      return;
+    }
     this.categoryService.getAll().subscribe((cats) => (this.categories = cats));
   }
 

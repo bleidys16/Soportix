@@ -70,40 +70,46 @@
               </mat-select>
             </mat-form-field>
 
-            @if (closingTicket()) {
-              <div class="close-ticket-form">
-                <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-                  <mat-label>Nota de resolución</mat-label>
-                  <textarea
-                    matInput
-                    [(ngModel)]="resolutionNotes"
-                    rows="3"
-                    placeholder="Describe cómo se resolvió este ticket..."
-                  ></textarea>
-                </mat-form-field>
-                @if (closeError) {
-                  <p class="error-message">{{ closeError }}</p>
-                }
-                <div class="close-actions">
-                  <button mat-button type="button" (click)="cancelClose()">Cancelar</button>
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    type="button"
-                    (click)="confirmClose()"
-                    [disabled]="!resolutionNotes.trim()"
-                  >
-                    Confirmar cierre
-                  </button>
-                </div>
-              </div>
-            }
-
             @if (t.assigned_to !== auth.getUserId()) {
               <button mat-stroked-button class="assign-btn" type="button" (click)="assignToMe()">
                 <mat-icon>assignment_ind</mat-icon> Asignarme
               </button>
             }
+          }
+
+          @if (auth.getUserRole() === 'user' && t.status !== 'closed') {
+            <button mat-raised-button class="resolve-btn" type="button" (click)="markAsResolved()">
+              <mat-icon>check_circle</mat-icon> Marcar como Resuelto
+            </button>
+          }
+
+          @if (closingTicket()) {
+            <div class="close-ticket-form">
+              <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                <mat-label>{{ userResolveMode() ? '¿Qué solucionó el problema? (opcional)' : 'Nota de resolución' }}</mat-label>
+                <textarea
+                  matInput
+                  [(ngModel)]="resolutionNotes"
+                  rows="3"
+                  placeholder="Describe cómo se resolvió este ticket..."
+                ></textarea>
+              </mat-form-field>
+              @if (closeError) {
+                <p class="error-message">{{ closeError }}</p>
+              }
+              <div class="close-actions">
+                <button mat-button type="button" (click)="cancelClose()">Cancelar</button>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="confirmClose()"
+                  [disabled]="!userResolveMode() && !resolutionNotes.trim()"
+                >
+                  {{ userResolveMode() ? 'Confirmar resolución' : 'Confirmar cierre' }}
+                </button>
+              </div>
+            </div>
           }
 
           <dl class="detail-list">

@@ -3,9 +3,11 @@
     <h1>{{ pageTitle() }}</h1>
     <p class="page-subtitle">{{ tickets().length }} ticket{{ tickets().length === 1 ? '' : 's' }} visible{{ tickets().length === 1 ? '' : 's' }} según tus filtros</p>
   </div>
-  <a mat-flat-button class="new-ticket-btn" routerLink="/tickets/new">
-    <mat-icon>add</mat-icon> Nuevo ticket
-  </a>
+  @if (auth.getUserRole() !== 'admin') {
+    <a mat-flat-button class="new-ticket-btn" routerLink="/tickets/new">
+      <mat-icon>add</mat-icon> Nuevo ticket
+    </a>
+  }
 </div>
 
 <div class="sx-card">

@@ -37,18 +37,26 @@ html {
 }
 
 :root {
-  // Marca (paleta "Ocean Eyes")
-  --sx-primary: #0d454e;
-  --sx-primary-hover: #051d25;
-  --sx-accent: #70a1a9;
-  --sx-accent-pale: #a9c7ce;
-  --sx-sidebar-bg: #051d25;
+  // Paleta Oficial de Colores
+  --sx-ocean-eyes: #A9C7CE;      // El más claro
+  --sx-reef-waters: #70A1A9;
+  --sx-grand-rapids: #3A747D;
+  --sx-incubi-darkness: #0D454E;
+  --sx-creeping-death: #051D25;
+
+  // Asignaciones de Marca
+  --sx-primary: var(--sx-incubi-darkness);
+  --sx-primary-hover: var(--sx-creeping-death);
+  --sx-accent: var(--sx-reef-waters);
+  --sx-accent-pale: var(--sx-ocean-eyes);
+  --sx-sidebar-bg: linear-gradient(160deg, var(--sx-grand-rapids) 0%, var(--sx-incubi-darkness) 100%);
+  --sx-navbar-bg: var(--sx-ocean-eyes);
   --sx-page-bg: #f4f7f8;
   --sx-card-bg: #ffffff;
-  --sx-border: #e0e7e8;
-  --sx-text-primary: #051d25;
-  --sx-text-secondary: #4b6a70;
-  --sx-text-muted: #8aa6ab;
+  --sx-border: #d4e2e6;
+  --sx-text-primary: var(--sx-creeping-death);
+  --sx-text-secondary: var(--sx-grand-rapids);
+  --sx-text-muted: #6b8f97;
 
   // Forma
   --sx-radius-card: 16px;
@@ -147,4 +155,71 @@ router-outlet + * {
 .send-btn:active:not(:disabled),
 .export-btn:active:not(:disabled) {
   transform: scale(0.98);
+}
+
+// ─── Dropdown de perfil de usuario ───────────────────────────────────────────
+// El menú se renderiza en el overlay de Angular Material (fuera del componente),
+// por eso sus estilos viven aquí, a nivel global.
+.user-menu-popover {
+  width: 200px;
+  background: #f8fafa;
+  border: 1px solid var(--sx-ocean-eyes);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(5, 29, 37, 0.14);
+  padding: 6px;
+  overflow: hidden;
+
+  .mat-mdc-menu-content {
+    padding: 0;
+  }
+
+  .menu-header {
+    padding: 12px 14px 10px;
+    text-align: left;
+  }
+
+  .header-name {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--sx-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-role {
+    margin: 2px 0 0;
+    font-size: 0.75rem;
+    color: var(--sx-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mat-divider {
+    border-top-color: var(--sx-border);
+    margin: 4px 0;
+  }
+
+  .logout-menu-item {
+    width: 100%;
+    height: 44px;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    color: var(--sx-text-primary);
+    justify-content: flex-start;
+
+    .mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      color: var(--sx-grand-rapids);
+    }
+
+    &:hover {
+      background: rgba(13, 69, 78, 0.06);
+    }
+  }
 }

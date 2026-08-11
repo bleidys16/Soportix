@@ -73,6 +73,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     .detail-list dt { color: var(--sx-text-secondary); margin: 0; }
     .detail-list dd { color: var(--sx-text-primary); margin: 0; text-align: right; }
     .assign-btn { margin-top: -0.5rem; margin-bottom: 0.75rem; width: 100%; border-radius: var(--sx-radius-control); }
+    .resolve-btn { margin-top: -0.5rem; margin-bottom: 0.75rem; width: 100%; border-radius: var(--sx-radius-control); background: #16a34a !important; color: #fff !important; }
 
     .spinner { display: flex; justify-content: center; padding: 3rem; }
   `]
@@ -90,6 +91,7 @@ export class TicketDetailPage implements OnInit {
   statuses: TicketStatus[] = ['open', 'in_progress', 'closed'];
 
   closingTicket = signal(false);
+  userResolveMode = signal(false);
   resolutionNotes = '';
   closeError: string | null = null;
 
@@ -106,6 +108,8 @@ export class TicketDetailPage implements OnInit {
     const t = this.ticket();
     if (!t) return;
 
+    this.userResolveMode.set(false);
+
     if (status === 'closed') {
       this.resolutionNotes = t.resolution_notes ?? '';
       this.closeError = null;
@@ -118,15 +122,27 @@ export class TicketDetailPage implements OnInit {
     });
   }
 
+  markAsResolved() {
+    this.resolutionNotes = '';
+    this.closeError = null;
+    this.userResolveMode.set(true);
+    this.closingTicket.set(true);
+  }
+
   confirmClose() {
     const t = this.ticket();
-    if (!t || !this.resolutionNotes.trim()) return;
+    if (!t) return;
 
     this.closeError = null;
-    this.ticketService.update(t.id, { status: 'closed', resolution_notes: this.resolutionNotes }).subscribe({
+    const notes = this.resolutionNotes.trim()
+      ? this.resolutionNotes.trim()
+      : 'El solicitante confirmó que su problema fue resuelto.';
+
+    this.ticketService.update(t.id, { status: 'closed', resolution_notes: notes }).subscribe({
       next: (updated) => {
         this.ticket.set(updated);
         this.closingTicket.set(false);
+        this.userResolveMode.set(false);
       },
       error: () => {
         this.closeError = 'No se pudo cerrar el ticket. Intenta nuevamente.';
@@ -136,6 +152,7 @@ export class TicketDetailPage implements OnInit {
 
   cancelClose() {
     this.closingTicket.set(false);
+    this.userResolveMode.set(false);
     this.closeError = null;
   }
 

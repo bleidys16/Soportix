@@ -24,9 +24,11 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
         <h1>Dashboard general</h1>
         <p class="dash-subtitle">Estado del servicio de soporte</p>
       </div>
-      <a mat-flat-button class="new-ticket-btn" routerLink="/tickets/new">
-        <mat-icon>add</mat-icon> Nuevo ticket
-      </a>
+      @if (auth.getUserRole() !== 'admin') {
+        <a mat-flat-button class="new-ticket-btn" routerLink="/tickets/new">
+          <mat-icon>add</mat-icon> Nuevo ticket
+        </a>
+      }
     </div>
 
     <div class="stats-grid">

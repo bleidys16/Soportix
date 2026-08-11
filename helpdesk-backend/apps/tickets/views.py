@@ -1,5 +1,7 @@
 from django.db.models import ProtectedError
-from rest_framework import viewsets, status
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, status, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
@@ -46,14 +48,36 @@ class TicketViewSet(viewsets.ModelViewSet):
         return Ticket.objects.all().order_by('-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        user = self.request.user
+        if user.profile.role == 'admin':
+            raise PermissionDenied('Los administradores no pueden crear tickets.')
+        serializer.save(created_by=user)
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if user.profile.role == 'user':
+            data = serializer.validated_data
+            if data.get('status') not in (None, 'closed'):
+                raise PermissionDenied('Solo puedes marcar tus propios tickets como resueltos.')
+            for field in data.keys():
+                if field not in ('status', 'resolution_notes'):
+                    raise PermissionDenied('No tienes permisos para modificar ese campo.')
+        serializer.save()
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Comment.objects.filter(ticket_id=self.kwargs['ticket_pk'])
+        qs = Comment.objects.filter(ticket_id=self.kwargs['ticket_pk'])
+        user = self.request.user
+        if user.profile.role == 'user':
+            qs = qs.filter(ticket__created_by=user)
+        return qs
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, ticket_id=self.kwargs['ticket_pk'])
+        ticket = get_object_or_404(Ticket, pk=self.kwargs['ticket_pk'])
+        user = self.request.user
+        if user.profile.role == 'user' and ticket.created_by != user:
+            raise PermissionDenied('Solo puedes comentar en tus propios tickets.')
+        serializer.save(author=user, ticket=ticket)

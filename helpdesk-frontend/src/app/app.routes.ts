@@ -25,6 +25,12 @@ export const routes: Routes = [
         loadChildren: () => import('./features/tickets/tickets.routes'),
       },
       {
+        path: 'reportes',
+        canActivate: [roleGuard],
+        data: { roles: ['agent', 'admin'] },
+        loadComponent: () => import('./features/admin/pages/reports-page').then((m) => m.ReportsPage),
+      },
+      {
         path: 'admin',
         canActivate: [roleGuard],
         data: { role: 'admin' },

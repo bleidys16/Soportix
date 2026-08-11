@@ -1,79 +1,143 @@
-<div class="topbar">
-  @if (isMobile()) {
-    <button mat-icon-button (click)="toggleSidenav()" aria-label="Alternar menú">
-      <mat-icon>menu</mat-icon>
-    </button>
-  }
-
-  <span class="spacer"></span>
-
-  <button mat-icon-button aria-label="Notificaciones">
-    <mat-icon>notifications_none</mat-icon>
-  </button>
-
-  <div class="user-chip">
-    <div class="avatar">{{ initials() }}</div>
-    <div class="user-text">
-      <span class="user-name">{{ username() }}</span>
-      <span class="user-role">{{ userRole() | titlecase }}</span>
-    </div>
-  </div>
-</div>
-
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav
-    [mode]="sidenavMode()"
-    [opened]="sidenavOpened()"
-    (closedStart)="sidenavOpened.set(false)"
-    class="app-sidenav"
-  >
-    <div class="brand">
-      <app-logo [size]="36" />
-      <div>
-        <div class="brand-name">Soportix</div>
-        <div class="brand-subtitle">Mesa de ayuda</div>
+<header class="navbar">
+  <div class="navbar-container">
+    <!-- Logo & Brand Name -->
+    <a class="navbar-brand" routerLink="/dashboard">
+      <app-logo [size]="44" />
+      <div class="brand-text">
+        <span class="brand-name">Soportix</span>
+        <span class="brand-tag">Mesa de Ayuda</span>
       </div>
-    </div>
+    </a>
 
-    <div class="nav-group">
-      <div class="nav-group-label">Operación</div>
-      @for (item of filteredOperationItems(); track item.route) {
-        <a
-          class="nav-item"
-          [routerLink]="item.route"
-          routerLinkActive="nav-item-active"
-          [routerLinkActiveOptions]="{ exact: item.route === '/tickets' }"
-          (click)="onNavClick()"
-        >
-          <mat-icon>{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
+    <!-- Desktop Navigation Links -->
+    @if (!isMobile()) {
+      <nav class="navbar-nav">
+        <!-- Operación -->
+        @for (item of filteredOperationItems(); track item.route) {
+          <a
+            class="nav-link"
+            [routerLink]="item.route"
+            routerLinkActive="nav-link-active"
+            [routerLinkActiveOptions]="{ exact: item.route === '/tickets' }"
+          >
+            <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+
+        <!-- Admin Divider & Links -->
+        @if (filteredAdminItems().length) {
+          <div class="nav-divider"></div>
+          @for (item of filteredAdminItems(); track item.route) {
+            <a
+              class="nav-link"
+              [routerLink]="item.route"
+              routerLinkActive="nav-link-active"
+            >
+              <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+              <span>{{ item.label }}</span>
+            </a>
+          }
+        }
+      </nav>
+    }
+
+    <div class="navbar-spacer"></div>
+
+    <!-- Right Actions -->
+    <div class="navbar-actions">
+      <!-- Quick Action: Nuevo Ticket Button (solo user y agent) -->
+      @if (userRole() !== 'admin') {
+        <a class="quick-new-ticket-btn" routerLink="/tickets/new">
+          <mat-icon>add</mat-icon>
+          <span class="btn-label">Nuevo Ticket</span>
         </a>
       }
-    </div>
 
-    @if (filteredAdminItems().length) {
-      <div class="nav-group">
-        <div class="nav-group-label">Administración</div>
-        @for (item of filteredAdminItems(); track item.route) {
-          <a class="nav-item" [routerLink]="item.route" routerLinkActive="nav-item-active" (click)="onNavClick()">
+      <!-- Notifications Icon -->
+      <button mat-icon-button class="icon-action-btn" aria-label="Notificaciones">
+        <mat-icon>notifications_none</mat-icon>
+      </button>
+
+      <!-- User Profile Menu -->
+      <button class="user-profile-trigger" [matMenuTriggerFor]="userMenu" aria-label="Menú de usuario">
+        <div class="user-avatar">{{ initials() }}</div>
+        <div class="user-details">
+          <span class="user-name-text">{{ username() }}</span>
+          <span class="user-role-text">{{ userRole() | titlecase }}</span>
+        </div>
+        <mat-icon class="chevron-icon">expand_more</mat-icon>
+      </button>
+
+      <mat-menu #userMenu="matMenu" xPosition="before" class="user-menu-popover">
+        <div class="menu-header">
+          <p class="header-name">{{ username() }}</p>
+          <p class="header-role">{{ roleLabel[userRole() ?? ''] || (userRole() | titlecase) }}</p>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()" class="logout-menu-item">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </mat-menu>
+
+      <!-- Mobile Hamburger Toggle Button -->
+      @if (isMobile()) {
+        <button mat-icon-button class="mobile-toggle-btn" (click)="toggleMobileMenu()" aria-label="Menú de navegación">
+          <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Navigation -->
+  @if (isMobile() && mobileMenuOpen()) {
+    <div class="mobile-menu-drawer">
+      <div class="mobile-menu-section">
+        <div class="mobile-section-title">Operación</div>
+        @for (item of filteredOperationItems(); track item.route) {
+          <a
+            class="mobile-nav-link"
+            [routerLink]="item.route"
+            routerLinkActive="mobile-nav-link-active"
+            [routerLinkActiveOptions]="{ exact: item.route === '/tickets' }"
+            (click)="closeMobileMenu()"
+          >
             <mat-icon>{{ item.icon }}</mat-icon>
             <span>{{ item.label }}</span>
           </a>
         }
       </div>
-    }
 
-    <span class="sidenav-spacer"></span>
+      @if (filteredAdminItems().length) {
+        <div class="mobile-menu-section">
+          <div class="mobile-section-title">Administración</div>
+          @for (item of filteredAdminItems(); track item.route) {
+            <a
+              class="mobile-nav-link"
+              [routerLink]="item.route"
+              routerLinkActive="mobile-nav-link-active"
+              (click)="closeMobileMenu()"
+            >
+              <mat-icon>{{ item.icon }}</mat-icon>
+              <span>{{ item.label }}</span>
+            </a>
+          }
+        </div>
+      }
 
-    <button class="nav-item logout-item" type="button" (click)="logout()">
-      <mat-icon>logout</mat-icon>
-      <span>Cerrar sesión</span>
-    </button>
-  </mat-sidenav>
-
-  <mat-sidenav-content class="sidenav-content">
-    <div class="content-wrapper">
-      <router-outlet />
+      <div class="mobile-menu-footer">
+        <button class="mobile-logout-btn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
     </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  }
+</header>
+
+<main class="main-layout-content">
+  <div class="content-wrapper">
+    <router-outlet />
+  </div>
+</main>
