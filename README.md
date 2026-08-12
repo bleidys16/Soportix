@@ -1,6 +1,30 @@
-# Soportix — Helpdesk / Mesa de Ayuda
+<div align="center">
+  <img src="helpdesk-frontend/public/soportix-logo.png" alt="Soportix" width="110" />
 
-Sistema de gestión de tickets de soporte técnico con control de acceso por roles (usuario final, agente de soporte y administrador). Backend en Django REST Framework + JWT, frontend en Angular con Material Design.
+  <h1>Soportix</h1>
+  <p><strong>Helpdesk / Mesa de Ayuda</strong> — gestión de tickets de soporte técnico con control de acceso por roles.</p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python" />
+    <img src="https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white" alt="Django" />
+    <img src="https://img.shields.io/badge/Django%20REST%20Framework-3.17-A30000?logo=django&logoColor=white" alt="Django REST Framework" />
+    <img src="https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white" alt="Angular" />
+    <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/PostgreSQL-Neon-316192?logo=postgresql&logoColor=white" alt="PostgreSQL" />
+    <img src="https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white" alt="JWT" />
+  </p>
+</div>
+
+## Índice
+
+- [Stack técnico](#stack-técnico)
+- [Roles del sistema](#roles-del-sistema)
+- [Cuentas de prueba](#cuentas-de-prueba)
+- [Requisitos previos](#requisitos-previos)
+- [Instalación](#instalación)
+- [Levantar el proyecto](#levantar-el-proyecto)
+- [Variables de entorno](#variables-de-entorno-backend)
+- [Estructura del proyecto](#estructura-del-proyecto)
 
 ## Stack técnico
 
@@ -137,5 +161,5 @@ Soportix/
         ├── auth/         # Login y registro
         ├── core/         # Servicios, guards, modelos, componentes compartidos
         ├── features/     # Dashboard, tickets, admin
-        └── layout/       # Sidebar + topbar
+        └── layout/       # Navbar superior compartido
 ```
