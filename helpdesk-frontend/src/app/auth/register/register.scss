@@ -10,10 +10,10 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-color: #042834;
+  background-color: #1a1345;
   background-image: url('/fondosoportix.png');
   background-repeat: no-repeat;
-  background-size: auto 85%;
+  background-size: auto 100%;
   background-position: right center;
   clip-path: polygon(59vw 0, 100vw 0, 100vw 100vh, 67vw 100vh);
 }
@@ -44,8 +44,9 @@
 }
 
 .brand-name {
+  font-family: 'Switzer', 'Geist', sans-serif;
   font-size: 1.5rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--sx-text-primary);
 }
 
@@ -55,8 +56,9 @@
 }
 
 .form-wrap h1 {
+  font-family: 'Switzer', 'Geist', sans-serif;
   font-size: 1.75rem;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--sx-text-primary);
   margin: 0 0 4px;
 }

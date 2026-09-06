@@ -1,8 +1,15 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 import { roleGuard } from './core/guards/role-guard';
+import { guestGuard } from './core/guards/guest-guard';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./features/landing/landing-page').then((m) => m.LandingPage),
+  },
   {
     path: 'login',
     loadComponent: () => import('./auth/login/login').then((m) => m.Login),
@@ -52,6 +59,5 @@ export const routes: Routes = [
       { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     ],
   },
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/dashboard' },
 ];

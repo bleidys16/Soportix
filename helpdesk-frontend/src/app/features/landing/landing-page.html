@@ -1,0 +1,98 @@
+<div class="landing">
+  <div class="trust-strip">
+    <div class="trust-track">
+      @for (i of [0, 1]; track i) {
+        @for (item of trustItems; track item) {
+          <span>{{ item }}</span>
+          <span class="dot">&middot;</span>
+        }
+      }
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <header class="landing-nav">
+      <div class="landing-nav-inner">
+        <app-logo [size]="36" />
+        <span class="brand-name">Soportix</span>
+        <nav class="nav-links">
+          <a routerLink="/login" class="nav-link">Iniciar sesión</a>
+          <a routerLink="/register" mat-stroked-button class="nav-register-btn">Crear cuenta</a>
+        </nav>
+      </div>
+    </header>
+    <div class="hero-content">
+      <h1>Organiza cada ticket, agente y respuesta en un solo lugar</h1>
+      <p class="hero-subtitle">
+        Soportix es una mesa de ayuda simple y completa para gestionar el soporte de tu equipo de principio a fin.
+      </p>
+      <div class="hero-actions">
+        <button
+          mat-flat-button
+          class="demo-btn"
+          type="button"
+          [disabled]="demoLoading()"
+          (click)="tryDemo()"
+        >
+          <mat-icon>play_arrow</mat-icon>
+          {{ demoLoading() ? 'Cargando demo...' : 'Probar demo' }}
+        </button>
+        <a routerLink="/login" mat-stroked-button class="login-btn">Iniciar sesión</a>
+      </div>
+      @if (demoError()) {
+        <p class="demo-error">{{ demoError() }}</p>
+      }
+      <p class="demo-hint">Sin registro. Entras directo con una cuenta de prueba.</p>
+    </div>
+  </section>
+
+  <section class="roles-band">
+    <div class="roles-section">
+      <h2>Un flujo pensado para cada rol</h2>
+      <div class="roles-grid">
+        @for (r of roles; track r.title; let i = $index) {
+          <div class="role-card">
+            <div class="role-card-header">
+              <span class="role-number">{{ i + 1 }}</span>
+              <h3>{{ r.title }}</h3>
+            </div>
+            <p>{{ r.text }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="features-band">
+    <div class="features-section">
+      <div class="features-layout">
+        <div class="features-intro">
+          <h2>Todo lo que tu equipo necesita para dar soporte</h2>
+        </div>
+
+        <div class="features-list" #featuresGrid>
+          @for (f of features; track f.title; let i = $index) {
+            <div class="feature-row" [style.transition-delay.ms]="(i % 2) * 120">
+              <div class="feature-row-header">
+                @if (f.image) {
+                  <img [src]="f.image" [alt]="f.title" class="feature-illustration" />
+                } @else {
+                  <mat-icon class="feature-icon">{{ f.icon }}</mat-icon>
+                }
+                <h3>{{ f.title }}</h3>
+              </div>
+              <p>{{ f.text }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <app-logo [size]="28" />
+    <span>Soportix</span>
+    <span class="footer-copy">&copy; 2026 Soportix. Proyecto de demostración.</span>
+  </footer>
+</div>

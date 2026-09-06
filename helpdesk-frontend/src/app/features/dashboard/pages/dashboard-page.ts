@@ -119,7 +119,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     .stat-icon.progress { color: var(--sx-status-progress-fg); }
     .stat-icon.closed { color: var(--sx-status-closed-fg); }
     .stat-icon.total { color: var(--sx-primary); }
-    .stat-icon.avg { color: #70a1a9; }
+    .stat-icon.avg { color: #9b8ec7; }
 
     .charts-grid, .bottom-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
     .chart-card h3, .activity-card h3 { margin: 0 0 1rem; font-size: 0.9375rem; font-weight: 500; color: var(--sx-text-primary); }

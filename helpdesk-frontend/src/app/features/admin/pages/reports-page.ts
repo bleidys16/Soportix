@@ -89,7 +89,7 @@ import { ChartComponent } from '../../../core/components/chart/chart';
     .stat-icon.progress { color: var(--sx-status-progress-fg); }
     .stat-icon.closed { color: var(--sx-status-closed-fg); }
     .stat-icon.total { color: var(--sx-primary); }
-    .stat-icon.avg { color: #70a1a9; }
+    .stat-icon.avg { color: #9b8ec7; }
 
     .trend-card { margin-bottom: 1.5rem; }
     .trend-card h3, .chart-card h3 { margin: 0 0 1rem; font-size: 0.9375rem; font-weight: 500; color: var(--sx-text-primary); }
@@ -144,7 +144,7 @@ export class ReportsPage implements OnInit {
 
     this.trendLabels.set(days.map((d) => new Date(d).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })));
     this.trendDatasets.set([
-      { label: 'Creados', data: days.map((d) => createdMap.get(d) ?? 0), color: '#0d454e' },
+      { label: 'Creados', data: days.map((d) => createdMap.get(d) ?? 0), color: '#0e21a0' },
       { label: 'Cerrados', data: days.map((d) => closedMap.get(d) ?? 0), color: '#22c55e' },
     ]);
   }

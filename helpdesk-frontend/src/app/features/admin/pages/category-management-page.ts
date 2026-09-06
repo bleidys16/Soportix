@@ -136,7 +136,7 @@ export class CategoryManagementPage implements OnInit {
     this.form = this.fb.group({
       name: ['', Validators.required],
       description: [''],
-      color: ['#0d454e'],
+      color: ['#0e21a0'],
     });
   }
 
@@ -159,7 +159,7 @@ export class CategoryManagementPage implements OnInit {
     } else {
       this.categoryService.create(data).subscribe(() => {
         this.loadCategories();
-        this.form.reset({ color: '#0d454e' });
+        this.form.reset({ color: '#0e21a0' });
       });
     }
   }
@@ -172,7 +172,7 @@ export class CategoryManagementPage implements OnInit {
 
   cancelEdit() {
     this.editingId = null;
-    this.form.reset({ color: '#0d454e' });
+    this.form.reset({ color: '#0e21a0' });
   }
 
   delete(cat: Category) {
