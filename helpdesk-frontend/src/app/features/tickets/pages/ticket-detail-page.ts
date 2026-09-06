@@ -12,8 +12,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TicketService } from '../../../core/services/ticket.service';
 import { CommentService } from '../../../core/services/comment.service';
+import { CannedResponseService } from '../../../core/services/canned-response.service';
+import { AttachmentService } from '../../../core/services/attachment.service';
 import { Ticket, TicketStatus } from '../../../core/models/ticket';
 import { Comment } from '../../../core/models/comment';
+import { CannedResponse } from '../../../core/models/canned-response';
+import { Attachment } from '../../../core/models/attachment';
 import { AuthService } from '../../../core/auth/auth';
 import { StatusBadgeComponent } from '../../../core/components/status-badge/status-badge';
 import { PriorityTagComponent } from '../../../core/components/priority-tag/priority-tag';
@@ -56,6 +60,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     .comment-body { white-space: pre-wrap; color: var(--sx-text-primary); font-size: 0.875rem; }
     .empty-hint { color: var(--sx-text-muted); font-size: 0.875rem; }
 
+    .canned-select { margin-top: 1rem; }
     .new-comment { display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 1rem; }
     .new-comment mat-form-field { flex: 1; }
     .send-btn { background: var(--sx-primary) !important; color: #fff !important; border-radius: var(--sx-radius-control); }
@@ -75,6 +80,29 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     .assign-btn { margin-top: -0.5rem; margin-bottom: 0.75rem; width: 100%; border-radius: var(--sx-radius-control); }
     .resolve-btn { margin-top: -0.5rem; margin-bottom: 0.75rem; width: 100%; border-radius: var(--sx-radius-control); background: #16a34a !important; color: #fff !important; }
 
+    .csat-card h3 { margin: 0 0 0.5rem; font-size: 0.9375rem; font-weight: 500; color: var(--sx-text-primary); }
+    .csat-hint { margin: 0 0 0.75rem; font-size: 0.8125rem; color: var(--sx-text-secondary); }
+    .csat-stars { display: flex; gap: 4px; margin-bottom: 0.75rem; }
+    .csat-star { background: none; border: none; padding: 0; cursor: pointer; color: var(--sx-text-muted); line-height: 1; }
+    .csat-star mat-icon { font-size: 28px; width: 28px; height: 28px; }
+    .csat-star.filled { color: #f59e0b; }
+    .csat-submit-btn { background: var(--sx-primary) !important; color: #fff !important; border-radius: var(--sx-radius-control); width: 100%; }
+    .csat-done { display: flex; align-items: center; gap: 8px; color: var(--sx-text-secondary); font-size: 0.875rem; }
+    .csat-done .csat-star mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    .csat-done .csat-star { pointer-events: none; }
+
+    .attachments-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--sx-border); }
+    .attachments-section h3 { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--sx-text-primary); }
+    .attachment-list { list-style: none; margin: 0 0 0.75rem; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .attachment-item { display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; }
+    .attachment-item a { color: var(--sx-primary); text-decoration: none; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .attachment-item a:hover { text-decoration: underline; }
+    .attachment-item mat-icon { font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
+    .attachment-item .delete-attachment-btn { width: 28px; height: 28px; line-height: 28px; flex-shrink: 0; }
+    .attachment-item .delete-attachment-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .attach-btn { border-radius: var(--sx-radius-control); }
+    .attachment-error { color: var(--mat-sys-error, #b3261e); font-size: 0.8125rem; margin: 0.375rem 0 0; }
+
     .spinner { display: flex; justify-content: center; padding: 3rem; }
   `]
 })
@@ -82,6 +110,8 @@ export class TicketDetailPage implements OnInit {
   private route = inject(ActivatedRoute);
   private ticketService = inject(TicketService);
   private commentService = inject(CommentService);
+  private cannedResponseService = inject(CannedResponseService);
+  private attachmentService = inject(AttachmentService);
 
   protected auth = inject(AuthService);
   ticket = signal<Ticket | null>(null);
@@ -89,19 +119,91 @@ export class TicketDetailPage implements OnInit {
   loading = signal(true);
   newCommentBody = '';
   statuses: TicketStatus[] = ['open', 'in_progress', 'closed'];
+  cannedResponses = signal<CannedResponse[]>([]);
+
+  attachments = signal<Attachment[]>([]);
+  uploadingFile = signal(false);
+  attachmentError: string | null = null;
 
   closingTicket = signal(false);
   userResolveMode = signal(false);
   resolutionNotes = '';
   closeError: string | null = null;
 
+  selectedRating = signal(0);
+  hoverRating = signal(0);
+  csatComment = '';
+  csatError: string | null = null;
+  csatSubmitting = signal(false);
+
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.ticketService.getById(id).subscribe((t) => {
       this.ticket.set(t);
+      this.attachments.set(t.attachments ?? []);
       this.loading.set(false);
     });
     this.commentService.getAll(id).subscribe((cs) => this.comments.set(cs));
+
+    if (this.auth.getUserRole() === 'agent' || this.auth.getUserRole() === 'admin') {
+      this.cannedResponseService.getAll().subscribe((rs) => this.cannedResponses.set(rs));
+    }
+  }
+
+  insertCannedResponse(response: CannedResponse) {
+    this.newCommentBody = this.newCommentBody.trim()
+      ? `${this.newCommentBody}\n${response.body}`
+      : response.body;
+  }
+
+  onFileSelected(event: Event) {
+    const t = this.ticket();
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!t || !file) return;
+
+    this.attachmentError = null;
+    this.uploadingFile.set(true);
+    this.attachmentService.upload(t.id, file).subscribe({
+      next: (a) => {
+        this.attachments.update((list) => [...list, a]);
+        this.uploadingFile.set(false);
+        input.value = '';
+      },
+      error: (err) => {
+        this.attachmentError = err?.error?.file?.[0] || 'No se pudo subir el archivo.';
+        this.uploadingFile.set(false);
+        input.value = '';
+      },
+    });
+  }
+
+  deleteAttachment(a: Attachment) {
+    const t = this.ticket();
+    if (!t) return;
+    this.attachmentService.delete(t.id, a.id).subscribe(() => {
+      this.attachments.update((list) => list.filter((x) => x.id !== a.id));
+    });
+  }
+
+  submitRating() {
+    const t = this.ticket();
+    if (!t || this.selectedRating() < 1) return;
+
+    this.csatError = null;
+    this.csatSubmitting.set(true);
+    this.ticketService
+      .update(t.id, { csat_rating: this.selectedRating(), csat_comment: this.csatComment.trim() || null })
+      .subscribe({
+        next: (updated) => {
+          this.ticket.set(updated);
+          this.csatSubmitting.set(false);
+        },
+        error: () => {
+          this.csatError = 'No se pudo enviar tu calificación. Intenta nuevamente.';
+          this.csatSubmitting.set(false);
+        },
+      });
   }
 
   changeStatus(status: TicketStatus) {

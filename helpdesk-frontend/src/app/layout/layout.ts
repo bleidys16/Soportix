@@ -50,6 +50,7 @@ export class Layout {
   protected readonly operationItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: ['admin', 'agent', 'user'] },
     { label: 'Tickets', icon: 'confirmation_number', route: '/tickets', roles: ['admin', 'agent', 'user'] },
+    { label: 'Respuestas', icon: 'quickreply', route: '/respuestas', roles: ['admin', 'agent'] },
     { label: 'Reportes', icon: 'bar_chart', route: '/reportes', roles: ['admin', 'agent'] },
   ];
 

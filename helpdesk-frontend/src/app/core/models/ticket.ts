@@ -1,3 +1,5 @@
+import { Attachment } from './attachment';
+
 export type TicketStatus = 'open' | 'in_progress' | 'closed';
 export type TicketPriority = 'low' | 'medium' | 'high';
 
@@ -8,6 +10,9 @@ export interface Ticket {
   status: TicketStatus;
   priority: TicketPriority;
   resolution_notes?: string | null;
+  csat_rating?: number | null;
+  csat_comment?: string | null;
+  attachments?: Attachment[];
   created_by: number;
   created_by_username?: string;
   assigned_to?: number | null;

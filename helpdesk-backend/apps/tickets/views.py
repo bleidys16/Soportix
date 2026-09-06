@@ -2,12 +2,16 @@ from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, permissions
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Category, Ticket, Comment
-from .serializers import CategorySerializer, TicketSerializer, CommentSerializer
+from .models import Category, Ticket, Comment, CannedResponse, Attachment
+from .serializers import (
+    CategorySerializer, TicketSerializer, CommentSerializer,
+    CannedResponseSerializer, AttachmentSerializer,
+)
 from .permissions import IsAdminUser, IsAgentUser, IsOwnerOrStaff
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -43,9 +47,14 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        base = (
+            Ticket.objects
+            .select_related('category', 'created_by', 'assigned_to')
+            .prefetch_related('comments__author__profile', 'attachments__uploaded_by')
+        )
         if user.profile.role == 'user':
-            return Ticket.objects.filter(created_by=user).order_by('-created_at')
-        return Ticket.objects.all().order_by('-created_at')
+            return base.filter(created_by=user).order_by('-created_at')
+        return base.order_by('-created_at')
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -60,7 +69,7 @@ class TicketViewSet(viewsets.ModelViewSet):
             if data.get('status') not in (None, 'closed'):
                 raise PermissionDenied('Solo puedes marcar tus propios tickets como resueltos.')
             for field in data.keys():
-                if field not in ('status', 'resolution_notes'):
+                if field not in ('status', 'resolution_notes', 'csat_rating', 'csat_comment'):
                     raise PermissionDenied('No tienes permisos para modificar ese campo.')
         serializer.save()
 
@@ -81,3 +90,36 @@ class CommentViewSet(viewsets.ModelViewSet):
         if user.profile.role == 'user' and ticket.created_by != user:
             raise PermissionDenied('Solo puedes comentar en tus propios tickets.')
         serializer.save(author=user, ticket=ticket)
+
+
+class CannedResponseViewSet(viewsets.ModelViewSet):
+    queryset = CannedResponse.objects.all()
+    serializer_class = CannedResponseSerializer
+    permission_classes = [IsAgentUser]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class AttachmentViewSet(viewsets.ModelViewSet):
+    serializer_class = AttachmentSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrStaff]
+    parser_classes = [MultiPartParser, FormParser]
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
+
+    def get_queryset(self):
+        return Attachment.objects.filter(ticket_id=self.kwargs['ticket_pk'])
+
+    def get_object(self):
+        # Los permisos de objeto se validan contra el ticket dueño del adjunto,
+        # no contra el propio Attachment (que no tiene created_by relevante para IsOwnerOrStaff).
+        attachment = get_object_or_404(Attachment, pk=self.kwargs['pk'], ticket_id=self.kwargs['ticket_pk'])
+        self.check_object_permissions(self.request, attachment.ticket)
+        return attachment
+
+    def perform_create(self, serializer):
+        ticket = get_object_or_404(Ticket, pk=self.kwargs['ticket_pk'])
+        user = self.request.user
+        if user.profile.role == 'user' and ticket.created_by != user:
+            raise PermissionDenied('Solo puedes adjuntar archivos en tus propios tickets.')
+        serializer.save(ticket=ticket, uploaded_by=user)

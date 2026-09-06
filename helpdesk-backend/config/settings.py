@@ -83,6 +83,8 @@ if DB_ENGINE == 'django.db.backends.postgresql':
             'OPTIONS': {
                 'sslmode': 'require',
             },
+            'CONN_MAX_AGE': 60,
+            'CONN_HEALTH_CHECKS': True,
         }
     }
 else:

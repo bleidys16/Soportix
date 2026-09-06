@@ -23,7 +23,103 @@
               <p>{{ t.resolution_notes }}</p>
             </div>
           }
+
+          <div class="attachments-section">
+            <h3>Adjuntos ({{ attachments().length }})</h3>
+
+            @if (attachments().length) {
+              <ul class="attachment-list">
+                @for (a of attachments(); track a.id) {
+                  <li class="attachment-item">
+                    <a [href]="a.file" target="_blank" rel="noopener">
+                      <mat-icon>attach_file</mat-icon>
+                      {{ a.file_name }}
+                    </a>
+                    <button
+                      mat-icon-button
+                      class="delete-attachment-btn"
+                      type="button"
+                      (click)="deleteAttachment(a)"
+                      aria-label="Eliminar adjunto"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+            <button
+              mat-stroked-button
+              class="attach-btn"
+              type="button"
+              [disabled]="uploadingFile()"
+              (click)="fileInput.click()"
+            >
+              <mat-icon>upload_file</mat-icon>
+              {{ uploadingFile() ? 'Subiendo...' : 'Adjuntar archivo' }}
+            </button>
+            @if (attachmentError) {
+              <p class="attachment-error">{{ attachmentError }}</p>
+            }
+          </div>
         </div>
+
+        @if (t.status === 'closed') {
+          <div class="sx-card csat-card">
+            @if (t.csat_rating) {
+              <h3>Calificación del usuario</h3>
+              <div class="csat-done">
+                <div class="csat-stars">
+                  @for (i of [1,2,3,4,5]; track i) {
+                    <span class="csat-star" [class.filled]="i <= t.csat_rating">
+                      <mat-icon>{{ i <= t.csat_rating ? 'star' : 'star_border' }}</mat-icon>
+                    </span>
+                  }
+                </div>
+                <span>({{ t.csat_rating }}/5)</span>
+              </div>
+              @if (t.csat_comment) {
+                <p class="description" style="margin-top: 0.5rem; font-size: 0.875rem;">{{ t.csat_comment }}</p>
+              }
+            } @else if (auth.getUserRole() === 'user') {
+              <h3>¿Cómo calificarías la atención recibida?</h3>
+              <p class="csat-hint">Tu opinión nos ayuda a mejorar el soporte.</p>
+              <div class="csat-stars">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <button
+                    type="button"
+                    class="csat-star"
+                    [class.filled]="i <= (hoverRating() || selectedRating())"
+                    (mouseenter)="hoverRating.set(i)"
+                    (mouseleave)="hoverRating.set(0)"
+                    (click)="selectedRating.set(i)"
+                    [attr.aria-label]="'Calificar con ' + i + ' estrellas'"
+                  >
+                    <mat-icon>{{ i <= (hoverRating() || selectedRating()) ? 'star' : 'star_border' }}</mat-icon>
+                  </button>
+                }
+              </div>
+              <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+                <mat-label>Comentario (opcional)</mat-label>
+                <textarea matInput [(ngModel)]="csatComment" rows="2" placeholder="Cuéntanos más sobre tu experiencia..."></textarea>
+              </mat-form-field>
+              @if (csatError) {
+                <p class="error-message">{{ csatError }}</p>
+              }
+              <button
+                mat-flat-button
+                class="csat-submit-btn"
+                type="button"
+                [disabled]="selectedRating() < 1 || csatSubmitting()"
+                (click)="submitRating()"
+              >
+                Enviar calificación
+              </button>
+            }
+          </div>
+        }
 
         <div class="sx-card comments-card">
           <h2>Conversación ({{ comments().length }})</h2>
@@ -44,6 +140,17 @@
             </div>
           } @empty {
             <p class="empty-hint">Sin comentarios aún.</p>
+          }
+
+          @if (cannedResponses().length) {
+            <mat-form-field appearance="outline" class="full-width canned-select" subscriptSizing="dynamic">
+              <mat-label>Insertar respuesta predefinida</mat-label>
+              <mat-select (selectionChange)="insertCannedResponse($event.value)">
+                @for (r of cannedResponses(); track r.id) {
+                  <mat-option [value]="r">{{ r.title }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           }
 
           <div class="new-comment">

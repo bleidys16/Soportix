@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -32,6 +33,10 @@ class Ticket(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     resolution_notes = models.TextField(blank=True, null=True)
+    csat_rating = models.PositiveSmallIntegerField(
+        blank=True, null=True, validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    csat_comment = models.TextField(blank=True, null=True)
 
     # Relaciones
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets_created')
@@ -55,9 +60,23 @@ class Comment(models.Model):
         return f"Comentario de {self.author.username} en Ticket #{self.ticket.id}"
 
 
+class CannedResponse(models.Model):
+    title = models.CharField(max_length=100)
+    body = models.TextField()
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='canned_responses')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['title']
+
+    def __str__(self):
+        return self.title
+
+
 class Attachment(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='attachments')
     file = models.FileField(upload_to='tickets/attachments/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='attachments')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
