@@ -1,5 +1,14 @@
 from rest_framework import permissions
 
+class DenyDemoWrites(permissions.BasePermission):
+    """Bloquea cualquier escritura de la cuenta de demostración pública, sin importar su rol."""
+    message = 'Esta es una cuenta de demostración de solo lectura. No se permiten cambios.'
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return not (request.user.is_authenticated and request.user.profile.is_demo)
+
 class IsAdminUser(permissions.BasePermission):
     """Permite el acceso solo a administradores."""
     def has_permission(self, request, view):

@@ -60,6 +60,12 @@ El rol se asigna desde el panel de administración (`/admin/usuarios`) o desde e
 
 > Son credenciales de demo para desarrollo/pruebas. Cámbialas antes de usar esta base de datos en un entorno real.
 
+Además existe una cuenta **`demo` / `Demo123456`** (rol `user`, de solo lectura) usada por el botón "Probar demo" de la landing pública: puede navegar toda la app pero tiene bloqueada cualquier escritura (crear/editar/borrar) a nivel de API, para que varios visitantes puedan probarla a la vez sin corromper los datos de ejemplo. Se crea/actualiza con:
+
+```bash
+python manage.py seed_demo_user
+```
+
 ## Requisitos previos
 
 - Python 3.12+

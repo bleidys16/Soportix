@@ -12,7 +12,7 @@ from .serializers import (
     CategorySerializer, TicketSerializer, CommentSerializer,
     CannedResponseSerializer, AttachmentSerializer,
 )
-from .permissions import IsAdminUser, IsAgentUser, IsOwnerOrStaff
+from .permissions import IsAdminUser, IsAgentUser, IsOwnerOrStaff, DenyDemoWrites
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -20,9 +20,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            permission_classes = [IsAuthenticated]
+            permission_classes = [IsAuthenticated, DenyDemoWrites]
         else:
-            permission_classes = [IsAdminUser]
+            permission_classes = [IsAdminUser, DenyDemoWrites]
         return [permission() for permission in permission_classes]
 
     def destroy(self, request, *args, **kwargs):
@@ -42,8 +42,8 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'destroy':
-            return [IsAdminUser()]
-        return [IsAuthenticated(), IsOwnerOrStaff()]
+            return [IsAdminUser(), DenyDemoWrites()]
+        return [IsAuthenticated(), IsOwnerOrStaff(), DenyDemoWrites()]
 
     def get_queryset(self):
         user = self.request.user
@@ -75,7 +75,7 @@ class TicketViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, DenyDemoWrites]
 
     def get_queryset(self):
         qs = Comment.objects.filter(ticket_id=self.kwargs['ticket_pk'])
@@ -95,7 +95,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class CannedResponseViewSet(viewsets.ModelViewSet):
     queryset = CannedResponse.objects.all()
     serializer_class = CannedResponseSerializer
-    permission_classes = [IsAgentUser]
+    permission_classes = [IsAgentUser, DenyDemoWrites]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -103,7 +103,7 @@ class CannedResponseViewSet(viewsets.ModelViewSet):
 
 class AttachmentViewSet(viewsets.ModelViewSet):
     serializer_class = AttachmentSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrStaff]
+    permission_classes = [IsAuthenticated, IsOwnerOrStaff, DenyDemoWrites]
     parser_classes = [MultiPartParser, FormParser]
     http_method_names = ['get', 'post', 'delete', 'head', 'options']
 

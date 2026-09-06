@@ -108,7 +108,7 @@ export class LandingPage implements AfterViewInit {
   tryDemo(): void {
     this.demoError.set(null);
     this.demoLoading.set(true);
-    this.auth.login({ username: 'usertest', password: 'Usertest123456' }, false).subscribe({
+    this.auth.login({ username: 'demo', password: 'Demo123456' }, false).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: () => {
         this.demoLoading.set(false);
