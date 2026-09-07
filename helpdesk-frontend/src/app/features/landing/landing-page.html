@@ -76,7 +76,7 @@
             <div class="feature-row" [style.transition-delay.ms]="(i % 2) * 120">
               <div class="feature-row-header">
                 @if (f.image) {
-                  <img [src]="f.image" [alt]="f.title" class="feature-illustration" />
+                  <img [src]="f.image" [alt]="f.title" class="feature-illustration" width="40" height="40" loading="lazy" />
                 } @else {
                   <mat-icon class="feature-icon">{{ f.icon }}</mat-icon>
                 }

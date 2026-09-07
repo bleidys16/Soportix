@@ -39,8 +39,18 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.tickets_created.count()
 
 
+from django.db.models import Q
+
 # Personalizar el JWT para incluir el 'role' en el payload 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        username_or_email = attrs.get(self.username_field)
+        if username_or_email:
+            user = User.objects.filter(Q(username__iexact=username_or_email) | Q(email__iexact=username_or_email)).first()
+            if user:
+                attrs[self.username_field] = user.username
+        return super().validate(attrs)
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
