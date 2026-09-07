@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="helpdesk-frontend/public/soportix-logo.png" alt="Soportix" width="160" />
+  <img src="helpdesk-frontend/public/soportix-logo.png" alt="Soportix" width="110" />
 
   <h1>Soportix</h1>
-  <p><strong>Helpdesk / Mesa de Ayuda</strong> — Gestión inteligente de tickets de soporte técnico con control de acceso por roles.</p>
+  <p><strong>Helpdesk / Mesa de Ayuda</strong> — gestión de tickets de soporte técnico con control de acceso por roles.</p>
 
   <p>
     <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python" />
@@ -12,79 +12,67 @@
     <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
     <img src="https://img.shields.io/badge/PostgreSQL-Neon-316192?logo=postgresql&logoColor=white" alt="PostgreSQL" />
     <img src="https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white" alt="JWT" />
-    <img src="https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel" />
   </p>
 </div>
 
----
-
-## ÍNDICE
+## Índice
 
 - [Stack técnico](#stack-técnico)
-- [Paleta de colores](#paleta-de-colores)
 - [Roles del sistema](#roles-del-sistema)
 - [Cuentas de prueba](#cuentas-de-prueba)
 - [Requisitos previos](#requisitos-previos)
-- [Instalación y ejecución local](#instalación-y-ejecución-local)
-- [Despliegue en Vercel (Frontend)](#despliegue-en-vercel-frontend)
+- [Instalación](#instalación)
+- [Levantar el proyecto](#levantar-el-proyecto)
+- [Variables de entorno](#variables-de-entorno-backend)
 - [Estructura del proyecto](#estructura-del-proyecto)
 
----
-
-## STACK TÉCNICO
+## Stack técnico
 
 **Backend**
-- **Django 5.2** + **Django REST Framework**
-- Autenticación JWT (`djangorestframework-simplejwt`) con soporte para ingreso por usuario o correo
-- PostgreSQL (producción vía Neon) o SQLite (desarrollo local)
+- Django 5.2 + Django REST Framework
+- Autenticación JWT (`djangorestframework-simplejwt`) con refresco automático de token
+- PostgreSQL (producción, vía Neon) o SQLite (desarrollo local, por defecto)
 - `django-filter`, `django-cors-headers`
 
 **Frontend**
-- **Angular 22** (componentes standalone, signals, zoneless routing)
+- Angular 22 (componentes standalone, signals, zoneless)
 - Angular Material + Angular CDK
-- Chart.js para métricas en tiempo real del Dashboard
-- Tipografía Switzer / Geist + Material Symbols Outlined
+- Chart.js para las gráficas del dashboard
+- Tipografía Geist + Material Symbols Outlined
 
----
+## Roles del sistema
 
-## PALETA DE COLORES
-
-| Color | Hex | Uso |
-|---|---|---|
-| **Indigo Principal** | `#0e21a0` | Navbar, encabezados primarios y elementos de marca |
-| **Coral Accent** | `#ff6f61` | Botones de acción principal (CTA, Demo, guardar) |
-| **Violeta Profundo** | `#4d2fb2` | Gráficas, badges de estado y acentos secundarios |
-| **Púrpura Vibrante** | `#b153d7` | Iluminaciones y degradados dinámicos |
-
----
-
-## ROLES DEL SISTEMA
-
-| Rol | Alcance y Permisos |
+| Rol | Puede hacer |
 |---|---|
-| **Usuario final** | Crea tickets, realiza comentarios en sus propios casos y evalúa la atención con calificación CSAT al resolverse. |
-| **Agente de soporte** | Visualiza todos los tickets del sistema, cambia estados, aplica respuestas predefinidas y responde solicitudes. |
-| **Administrador** | Control total del sistema: gestión de usuarios, asignación de roles, configuración de categorías y reportes. |
+| **Usuario final** | Crear tickets y darles seguimiento a los propios |
+| **Agente de soporte** | Ver y gestionar todos los tickets, cambiar estado, comentar, asignarse tickets |
+| **Administrador** | Todo lo del agente, más gestión de usuarios (roles/estado), categorías y reportes |
 
----
+El rol se asigna desde el panel de administración (`/admin/usuarios`) o desde el admin nativo de Django — el registro público siempre crea usuarios con rol `user`.
 
-## CUENTAS DE PRUEBA
+## Cuentas de prueba
 
 | Rol | Usuario | Email | Contraseña |
 |---|---|---|---|
-| **Administrador** | `admin` | `admin@soportix.com` | `Admin123456` |
-| **Agente de soporte** | `agente` | `agente@soportix.com` | `Agente123456` |
-| **Usuario final** | `usertest` | `usertest@soportix.com` | `Usertest123456` |
-| **Cuenta Demo** | `demo` | `demo@soportix.com` | `Demo123456` |
+| Administrador | `admin` | admin@soportix.com | `Admin123456` |
+| Agente de soporte | `agente` | agente@soportix.com | `Agente123456` |
+| Usuario final | `usertest` | usertest@soportix.com | `Usertest123456` |
 
-> El botón **"Probar demo"** en la Landing Page ingresa automáticamente con la cuenta `demo` de solo lectura. Para instalar o resetear las cuentas de prueba ejecuta:
+> Son credenciales de demo para desarrollo/pruebas. Cámbialas antes de usar esta base de datos en un entorno real.
+
+Además existe una cuenta **`demo` / `Demo123456`** (rol `user`, de solo lectura) usada por el botón "Probar demo" de la landing pública: puede navegar toda la app pero tiene bloqueada cualquier escritura (crear/editar/borrar) a nivel de API, para que varios visitantes puedan probarla a la vez sin corromper los datos de ejemplo. Se crea/actualiza con:
+
 ```bash
 python manage.py seed_demo_user
 ```
 
----
+## Requisitos previos
 
-## INSTALACIÓN Y EJECUCIÓN LOCAL
+- Python 3.12+
+- Node.js 20+ y npm
+- PostgreSQL (opcional — sin configurar, usa SQLite automáticamente)
+
+## Instalación
 
 ### 1. Clonar el repositorio
 
@@ -93,76 +81,91 @@ git clone https://github.com/bleidys16/Soportix.git
 cd Soportix
 ```
 
-### 2. Levantar el Backend (Django)
+### 2. Backend (Django)
 
 ```bash
 cd helpdesk-backend
-python -m venv venv
-.\venv\Scripts\activate          # Windows
-# source venv/bin/activate       # macOS/Linux
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS/Linux
 
 pip install -r requirements.txt
-python manage.py migrate
-python manage.py seed_demo_user
-python manage.py runserver
 ```
 
-### 3. Levantar el Frontend (Angular)
+Crea un archivo `.env` dentro de `helpdesk-backend/` (no se versiona) con al menos:
+
+```env
+SECRET_KEY=una-clave-secreta-cualquiera
+DEBUG=True
+ALLOWED_HOSTS=*
+CORS_ALLOWED_ORIGINS=http://localhost:4200
+```
+
+Para usar PostgreSQL en vez de SQLite, agrega además:
+
+```env
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=tu_bd
+DB_USER=tu_usuario
+DB_PASSWORD=tu_password
+DB_HOST=tu_host
+DB_PORT=5432
+```
+
+Aplica las migraciones y crea un superusuario:
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+### 3. Frontend (Angular)
 
 ```bash
 cd helpdesk-frontend
 npm install
+```
+
+## Levantar el proyecto
+
+Con dos terminales abiertas en paralelo:
+
+```bash
+# Terminal 1 — backend (http://localhost:8000)
+cd helpdesk-backend
+.venv\Scripts\python.exe manage.py runserver
+
+# Terminal 2 — frontend (http://localhost:4200)
+cd helpdesk-frontend
 npm start
 ```
 
-Abre **`http://localhost:4200`** en tu navegador.
+Abre **http://localhost:4200** en el navegador. El superusuario que creaste con `createsuperuser` tiene rol de administrador automáticamente.
 
----
+## Variables de entorno (backend)
 
-## DESPLIEGUE EN VERCEL (FRONTEND)
+| Variable | Requerida | Descripción |
+|---|---|---|
+| `SECRET_KEY` | Sí | Clave secreta de Django |
+| `DEBUG` | No (default `True`) | Modo debug |
+| `ALLOWED_HOSTS` | No (default `*`) | Hosts permitidos, separados por coma |
+| `CORS_ALLOWED_ORIGINS` | No (default `http://localhost:4200`) | Orígenes permitidos para CORS |
+| `DB_ENGINE` | No (default SQLite) | `django.db.backends.postgresql` para usar Postgres |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Solo si usas Postgres | Credenciales de conexión |
 
-El frontend de Angular está listo para desplegarse en **Vercel** con reescrituras de Single Page Application (SPA).
-
-### Pasos para desplegar desde el Dashboard de Vercel:
-
-1. Ingresa a [Vercel Dashboard](https://vercel.com/dashboard) e inicia sesión con tu cuenta de GitHub.
-2. Haz clic en **"Add New..."** ➔ **"Project"**.
-3. Importa el repositorio **`bleidys16/Soportix`**.
-4. Configura el proyecto con los siguientes valores:
-   - **Root Directory**: `helpdesk-frontend` *(¡Importante!)*
-   - **Framework Preset**: `Angular`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist/helpdesk-frontend/browser`
-5. En la sección **Environment Variables**, añade:
-   - `NG_APP_API_URL`: La URL pública de tu API Backend (ejemplo: `https://tu-backend.onrender.com/api`)
-6. Haz clic en **Deploy**.
-
-### Pasos para desplegar desde la Terminal (Vercel CLI):
-
-```bash
-npm install -g vercel
-cd helpdesk-frontend
-vercel
-```
-
-*(El archivo `vercel.json` incluido redirige automáticamente las rutas deep-link `/login`, `/dashboard`, `/tickets` a `index.html` para evitar errores 404).*
-
----
-
-## ESTRUCTURA DEL PROYECTO
+## Estructura del proyecto
 
 ```
 Soportix/
-├── helpdesk-backend/     # API REST en Django + JWT
+├── helpdesk-backend/     # API REST en Django
 │   └── apps/
-│       ├── users/        # Autenticación, perfiles y gestión de roles
-│       ├── tickets/      # Tickets, categorías, comentarios y adjuntos
-│       └── dashboard/    # Endpoints de estadísticas y reportes
-└── helpdesk-frontend/    # SPA en Angular 22
-    ├── vercel.json       # Configuración de despliegue para Vercel
+│       ├── users/        # Autenticación, perfiles y roles
+│       ├── tickets/      # Tickets, categorías, comentarios
+│       └── dashboard/    # Endpoints de métricas y reportes
+└── helpdesk-frontend/    # SPA en Angular
     └── src/app/
         ├── auth/         # Login y registro
-        ├── core/         # Guardias, interceptores JWT y servicios
-        ├── features/     # Landing, Dashboard, Tickets y Administración
-        └── layout/       # Layout responsive principal
+        ├── core/         # Servicios, guards, modelos, componentes compartidos
+        ├── features/     # Dashboard, tickets, admin
+        └── layout/       # Navbar superior compartido
 ```
