@@ -30,7 +30,10 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": ["src/styles.scss"],
+            "define": {
+              "NG_API_URL": "process.env.NG_API_URL"
+            }
           },
           "configurations": {
             "production": {

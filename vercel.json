@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "buildCommand": "cd helpdesk-frontend && npm install && npm run build",
+  "outputDirectory": "helpdesk-frontend/dist/helpdesk-frontend/browser",
+  "devCommand": "cd helpdesk-frontend && npm start",
+  "installCommand": "cd helpdesk-frontend && npm install",
+  "framework": "angular",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

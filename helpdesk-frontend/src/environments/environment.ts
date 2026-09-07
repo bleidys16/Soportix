@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://tu-backend.onrender.com/api'
+  apiUrl: import.meta.env.NG_API_URL || 'https://tu-backend.onrender.com/api'
 };
