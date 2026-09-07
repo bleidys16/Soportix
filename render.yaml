@@ -40,20 +40,6 @@ services:
           name: soportix-db
           property: port
 
-  # Frontend - Angular Static Site
-  - type: static
-    name: soportix-frontend
-    rootDir: helpdesk-frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist/helpdesk-frontend/browser
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: NG_API_URL
-        value: "https://soportix-backend.onrender.com/api"
-
 databases:
   - name: soportix-db
     databaseName: soportix
