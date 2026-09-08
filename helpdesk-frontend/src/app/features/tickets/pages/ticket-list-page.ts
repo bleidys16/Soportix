@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -44,10 +45,17 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     .creator-cell { display: flex; align-items: center; gap: 8px; }
     .mini-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--sx-primary); color: #fff; font-size: 0.625rem; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .spinner { display: flex; justify-content: center; padding: 3rem; }
+
+    .empty-state-cell { padding: 3rem 1rem !important; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .empty-state mat-icon { font-size: 32px; width: 32px; height: 32px; color: var(--sx-text-muted); }
+    .empty-state p { margin: 0; color: var(--sx-text-secondary); font-size: 0.9rem; }
+    .empty-state a { margin-top: 0.5rem; }
   `]
 })
 export class TicketListPage implements OnInit {
   private ticketService = inject(TicketService);
+  private breakpointObserver = inject(BreakpointObserver);
   protected auth = inject(AuthService);
 
   tickets = signal<Ticket[]>([]);
@@ -57,10 +65,15 @@ export class TicketListPage implements OnInit {
   statuses: TicketStatus[] = ['open', 'in_progress', 'closed'];
   priorities: TicketPriority[] = ['low', 'medium', 'high'];
 
-  displayedColumns = ['id', 'title', 'status', 'priority', 'category_name', 'created_by_username', 'created_at', 'actions'];
+  private allColumns = ['id', 'title', 'status', 'priority', 'category_name', 'created_by_username', 'created_at', 'actions'];
+  private compactColumns = ['id', 'title', 'status', 'priority', 'actions'];
+  displayedColumns = signal(this.allColumns);
 
   ngOnInit() {
     this.loadTickets();
+    this.breakpointObserver.observe('(max-width: 768px)').subscribe(({ matches }) => {
+      this.displayedColumns.set(matches ? this.compactColumns : this.allColumns);
+    });
   }
 
   pageTitle(): string {

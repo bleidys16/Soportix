@@ -99,13 +99,21 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
 
       @if (tickets().length === 0) {
         <tr class="mat-row">
-          <td class="mat-cell" [attr.colspan]="displayedColumns.length" style="text-align:center;padding:2rem;">
-            No hay tickets
+          <td class="mat-cell empty-state-cell" [attr.colspan]="displayedColumns().length">
+            <div class="empty-state">
+              <mat-icon>confirmation_number</mat-icon>
+              <p>No hay tickets todavía.</p>
+              @if (auth.getUserRole() !== 'admin') {
+                <a mat-stroked-button routerLink="/tickets/new">
+                  <mat-icon>add</mat-icon> Crear tu primer ticket
+                </a>
+              }
+            </div>
           </td>
         </tr>
       }

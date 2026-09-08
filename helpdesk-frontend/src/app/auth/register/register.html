@@ -15,9 +15,9 @@
       <p class="subtitle">Únete a Soportix y simplifica tu soporte técnico.</p>
 
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <label class="field-label" for="reg-username">Usuario</label>
+        <label class="field-label" for="reg-fullname">Nombre completo</label>
         <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <input matInput id="reg-username" formControlName="username" placeholder="Elige un nombre de usuario" [errorStateMatcher]="matcher" />
+          <input matInput id="reg-fullname" formControlName="full_name" placeholder="Ingresa tu nombre completo" [errorStateMatcher]="matcher" />
         </mat-form-field>
 
         <label class="field-label" for="reg-email">Email</label>

@@ -1,0 +1,115 @@
+<div class="onboarding-screen">
+  <div class="onboarding-card">
+    <div class="onboarding-brand">
+      <app-logo [size]="36" />
+      <span>Soportix</span>
+    </div>
+
+    <div class="step-dots">
+      <span class="dot" [class.active]="step() >= 1"></span>
+      <span class="dot" [class.active]="step() >= 2"></span>
+      <span class="dot" [class.active]="step() >= 3"></span>
+    </div>
+
+    @if (step() === 1) {
+      <div class="step-panel">
+        <h1>¡Bienvenido{{ username ? ', ' + username : '' }}!</h1>
+        <p class="lead">Antes de empezar, esto es lo que puedes hacer en Soportix:</p>
+
+        <ul class="feature-list">
+          <li>
+            <mat-icon>confirmation_number</mat-icon>
+            <div>
+              <strong>Crea tickets</strong>
+              <span>Describe tu problema y nuestro equipo lo atenderá.</span>
+            </div>
+          </li>
+          <li>
+            <mat-icon>forum</mat-icon>
+            <div>
+              <strong>Da seguimiento</strong>
+              <span>Conversa con el agente asignado directo en el ticket.</span>
+            </div>
+          </li>
+          <li>
+            <mat-icon>star</mat-icon>
+            <div>
+              <strong>Califica la atención</strong>
+              <span>Al cerrar un ticket, cuéntanos cómo fue tu experiencia.</span>
+            </div>
+          </li>
+        </ul>
+
+        <div class="step-actions">
+          <button mat-flat-button class="primary-btn" type="button" (click)="goToStep(2)">
+            Comenzar
+          </button>
+          <button mat-button type="button" class="skip-link" (click)="finish()">
+            Omitir e ir al dashboard
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (step() === 2) {
+      <div class="step-panel">
+        <h1>Creemos tu primer ticket</h1>
+        <p class="lead">No te preocupes, puedes editarlo o cerrarlo después. Es solo para que veas cómo funciona.</p>
+
+        <form [formGroup]="form" (ngSubmit)="createFirstTicket()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Título</mat-label>
+            <input matInput formControlName="title" placeholder="Ej. No puedo acceder a mi correo" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Categoría</mat-label>
+            <mat-select formControlName="category">
+              @for (cat of categories; track cat.id) {
+                <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción</mat-label>
+            <textarea matInput formControlName="description" rows="4" placeholder="¿Qué ocurre?"></textarea>
+          </mat-form-field>
+
+          <div class="step-actions">
+            <button
+              mat-flat-button
+              class="primary-btn"
+              type="submit"
+              [disabled]="form.invalid || creating()"
+            >
+              {{ creating() ? 'Creando...' : 'Crear ticket' }}
+            </button>
+            <button mat-button type="button" class="skip-link" (click)="finish()">
+              Omitir por ahora
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    @if (step() === 3) {
+      <div class="step-panel step-panel-final">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        @if (ticketCreated()) {
+          <h1>¡Tu primer ticket fue creado!</h1>
+          <p class="lead">Así se ve el flujo completo: puedes seguir su estado, comentar y calificar la atención cuando se cierre, todo desde el dashboard.</p>
+        } @else {
+          <h1>¡Todo listo!</h1>
+          <p class="lead">Ya puedes explorar Soportix y crear tu primer ticket cuando quieras.</p>
+        }
+
+        <div class="step-actions">
+          <button mat-flat-button class="primary-btn" type="button" (click)="finish()">
+            Ir al dashboard
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

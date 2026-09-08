@@ -38,7 +38,7 @@ export class Register {
     private router: Router
   ) {
     this.registerForm = this.fb.group({
-      username: ['', Validators.required],
+      full_name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
@@ -59,11 +59,24 @@ export class Register {
     this.error = null;
     this.auth.register(data).subscribe({
       next: () => {
-        this.router.navigate(['/login'], { queryParams: { registered: 'true' } });
+        this.auth.login({ username: data.email, password: data.password }).subscribe({
+          next: () => this.router.navigate(['/onboarding']),
+          error: () => this.router.navigate(['/login'], { queryParams: { registered: 'true' } }),
+        });
       },
-      error: () => {
-        this.error = 'Error al registrar. Intente nuevamente.';
+      error: (err) => {
+        this.error = this.extractErrorMessage(err);
       },
     });
+  }
+
+  private extractErrorMessage(err: unknown): string {
+    const body = (err as { error?: Record<string, unknown> })?.error;
+    if (body && typeof body === 'object') {
+      const firstField = Object.values(body)[0];
+      const firstMessage = Array.isArray(firstField) ? firstField[0] : firstField;
+      if (typeof firstMessage === 'string') return firstMessage;
+    }
+    return 'Error al registrar. Intente nuevamente.';
   }
 }

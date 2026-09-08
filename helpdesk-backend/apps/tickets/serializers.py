@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Ticket, Comment, Attachment, CannedResponse
+from .models import Category, Ticket, Comment, Attachment, CannedResponse, Notification
 
 class CategorySerializer(serializers.ModelSerializer):
     ticket_count = serializers.SerializerMethodField()
@@ -27,6 +27,15 @@ class CannedResponseSerializer(serializers.ModelSerializer):
         model = CannedResponse
         fields = ['id', 'title', 'body', 'created_by', 'created_by_username', 'created_at']
         read_only_fields = ['created_by', 'created_at']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    ticket_title = serializers.CharField(source='ticket.title', read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'ticket', 'ticket_title', 'notif_type', 'message', 'is_read', 'created_at']
+        read_only_fields = fields
 
 
 MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024  # 10 MB

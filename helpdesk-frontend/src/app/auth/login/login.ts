@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/auth/auth';
 import { SubmitErrorStateMatcher } from '../../core/utils/submit-error-state-matcher';
 import { LogoComponent } from '../../core/components/logo/logo';
@@ -36,7 +37,8 @@ export class Login {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -61,5 +63,13 @@ export class Login {
         this.error = 'Credenciales inválidas. Intente nuevamente.';
       },
     });
+  }
+
+  onForgotPassword(): void {
+    this.snackBar.open(
+      'Por ahora, contacta a un administrador para restablecer tu contraseña.',
+      'Cerrar',
+      { duration: 6000 }
+    );
   }
 }

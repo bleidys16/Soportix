@@ -18,6 +18,7 @@
 ## Índice
 
 - [Stack técnico](#stack-técnico)
+- [Landing y demo pública](#landing-y-demo-pública)
 - [Roles del sistema](#roles-del-sistema)
 - [Cuentas de prueba](#cuentas-de-prueba)
 - [Requisitos previos](#requisitos-previos)
@@ -30,7 +31,7 @@
 
 **Backend**
 - Django 5.2 + Django REST Framework
-- Autenticación JWT (`djangorestframework-simplejwt`) con refresco automático de token
+- Autenticación JWT (`djangorestframework-simplejwt`) con refresco automático de token, login con usuario o email
 - PostgreSQL (producción, vía Neon) o SQLite (desarrollo local, por defecto)
 - `django-filter`, `django-cors-headers`
 
@@ -38,7 +39,14 @@
 - Angular 22 (componentes standalone, signals, zoneless)
 - Angular Material + Angular CDK
 - Chart.js para las gráficas del dashboard
-- Tipografía Geist + Material Symbols Outlined
+- Tipografía Geist + Switzer (Fontshare) + Material Symbols Outlined
+
+## Landing y demo pública
+
+El dominio raíz (`/`) muestra una landing pública (no requiere sesión) con:
+
+- Botón **"Probar demo"**: inicia sesión al instante con la cuenta `demo` de solo lectura, sin formularios.
+- Registro real (`/register`) que crea la cuenta, inicia sesión automáticamente y lleva a un **onboarding** de 3 pasos (bienvenida → primer ticket guiado → listo) antes del dashboard.
 
 ## Roles del sistema
 
@@ -166,6 +174,6 @@ Soportix/
     └── src/app/
         ├── auth/         # Login y registro
         ├── core/         # Servicios, guards, modelos, componentes compartidos
-        ├── features/     # Dashboard, tickets, admin
+        ├── features/     # Landing, onboarding, dashboard, tickets, admin, agente
         └── layout/       # Navbar superior compartido
 ```

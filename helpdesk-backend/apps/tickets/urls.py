@@ -1,12 +1,16 @@
 from django.urls import path, include
 from rest_framework_nested import routers
-from .views import CategoryViewSet, TicketViewSet, CommentViewSet, CannedResponseViewSet, AttachmentViewSet
+from .views import (
+    CategoryViewSet, TicketViewSet, CommentViewSet, CannedResponseViewSet,
+    AttachmentViewSet, NotificationViewSet,
+)
 
 # 1. Configurar el router principal
 router = routers.SimpleRouter()
 router.register(r'categories', CategoryViewSet, basename='categories')
 router.register(r'tickets', TicketViewSet, basename='tickets')
 router.register(r'canned-responses', CannedResponseViewSet, basename='canned-responses')
+router.register(r'notifications', NotificationViewSet, basename='notifications')
 
 # 2. Configurar el router anidado para los comentarios y adjuntos
 tickets_router = routers.NestedSimpleRouter(router, r'tickets', lookup='ticket')

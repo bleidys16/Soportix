@@ -1,18 +1,20 @@
 from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Category, Ticket, Comment, CannedResponse, Attachment
+from .models import Category, Ticket, Comment, CannedResponse, Attachment, Notification
 from .serializers import (
     CategorySerializer, TicketSerializer, CommentSerializer,
-    CannedResponseSerializer, AttachmentSerializer,
+    CannedResponseSerializer, AttachmentSerializer, NotificationSerializer,
 )
 from .permissions import IsAdminUser, IsAgentUser, IsOwnerOrStaff, DenyDemoWrites
+from .notifications import notify_new_comment, notify_status_change, notify_assignment
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -71,7 +73,13 @@ class TicketViewSet(viewsets.ModelViewSet):
             for field in data.keys():
                 if field not in ('status', 'resolution_notes', 'csat_rating', 'csat_comment'):
                     raise PermissionDenied('No tienes permisos para modificar ese campo.')
+
+        ticket = serializer.instance
+        old_status = ticket.status
+        old_assigned_id = ticket.assigned_to_id
         serializer.save()
+        notify_status_change(ticket, user, old_status, ticket.status)
+        notify_assignment(ticket, user, old_assigned_id, ticket.assigned_to_id)
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -90,6 +98,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         if user.profile.role == 'user' and ticket.created_by != user:
             raise PermissionDenied('Solo puedes comentar en tus propios tickets.')
         serializer.save(author=user, ticket=ticket)
+        notify_new_comment(ticket, user)
 
 
 class CannedResponseViewSet(viewsets.ModelViewSet):
@@ -123,3 +132,31 @@ class AttachmentViewSet(viewsets.ModelViewSet):
         if user.profile.role == 'user' and ticket.created_by != user:
             raise PermissionDenied('Solo puedes adjuntar archivos en tus propios tickets.')
         serializer.save(ticket=ticket, uploaded_by=user)
+
+
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated, DenyDemoWrites]
+
+    def get_queryset(self):
+        queryset = Notification.objects.filter(recipient=self.request.user)
+        if self.action == 'list':
+            return queryset[:30]
+        return queryset
+
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        count = self.get_queryset().filter(is_read=False).count()
+        return Response({'count': count})
+
+    @action(detail=True, methods=['post'])
+    def mark_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+        return Response(self.get_serializer(notification).data)
+
+    @action(detail=False, methods=['post'])
+    def mark_all_read(self, request):
+        self.get_queryset().filter(is_read=False).update(is_read=True)
+        return Response({'status': 'ok'})

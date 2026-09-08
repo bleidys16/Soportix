@@ -1,0 +1,141 @@
+.onboarding-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: radial-gradient(120% 140% at 100% 0%, rgba(255, 111, 97, 0.12) 0%, transparent 45%),
+    radial-gradient(120% 140% at 0% 100%, rgba(77, 47, 178, 0.1) 0%, transparent 45%), #fff;
+}
+
+.onboarding-card {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border: 1px solid rgba(8, 20, 84, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(8, 20, 84, 0.1);
+  padding: 2.5rem;
+  box-sizing: border-box;
+}
+
+.onboarding-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.75rem;
+
+  span {
+    font-family: 'Switzer', 'Geist', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--sx-text-primary);
+  }
+}
+
+.step-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1.75rem;
+}
+
+.dot {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(8, 20, 84, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.dot.active {
+  background: var(--sx-incubi-darkness);
+}
+
+.step-panel h1 {
+  font-family: 'Switzer', 'Geist', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--sx-text-primary);
+  margin: 0 0 0.5rem;
+}
+
+.lead {
+  color: var(--sx-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1.75rem;
+}
+
+.feature-list {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  mat-icon {
+    flex: 0 0 auto;
+    color: var(--sx-incubi-darkness);
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  strong {
+    font-size: 0.9rem;
+    color: var(--sx-text-primary);
+  }
+
+  span {
+    font-size: 0.825rem;
+    color: var(--sx-text-secondary);
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.step-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 10px;
+  background: var(--sx-primary) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.skip-link {
+  color: var(--sx-text-muted) !important;
+  font-size: 0.825rem !important;
+}
+
+.step-panel-final {
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #2e7d32;
+  margin-bottom: 0.75rem;
+}

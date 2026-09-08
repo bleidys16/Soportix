@@ -49,7 +49,7 @@
 
         <div class="options-row">
           <mat-checkbox formControlName="remember">Recordarme</mat-checkbox>
-          <button type="button" class="link-btn" (click)="$event.preventDefault()">¿Olvidaste tu contraseña?</button>
+          <button type="button" class="link-btn" (click)="onForgotPassword()">¿Olvidaste tu contraseña?</button>
         </div>
 
         @if (error) {
