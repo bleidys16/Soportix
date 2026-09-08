@@ -36,8 +36,9 @@ services:
         value: "5432"
 
   # Frontend - Angular SPA (Static Site)
-  - type: static
+  - type: web
     name: soportix-frontend
+    runtime: static
     rootDir: helpdesk-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist/helpdesk-frontend/browser
