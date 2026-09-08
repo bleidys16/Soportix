@@ -172,6 +172,8 @@ _cors_raw = config(
 )
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors_raw.split(',') if origin.strip()]
 
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.onrender\.com$",
     r"^https://.*\.vercel\.app$",
