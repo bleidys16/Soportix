@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: import.meta.env.NG_API_URL || 'https://tu-backend.onrender.com/api'
-};
+  apiUrl: (import.meta as any).env?.NG_API_URL || 'http://localhost:8000/api'
+};
