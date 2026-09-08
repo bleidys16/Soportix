@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +16,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink, DatePipe, DecimalPipe, FormsModule, MatIconModule, MatButtonModule,
     MatMenuModule, MatTooltipModule,
@@ -225,9 +226,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
           <!-- All Tickets Card -->
           <div class="kpi-card card-all" (click)="selectedStatus.set('all')">
             <div class="kpi-card-header">
-              <div class="kpi-icon-box">
-                <mat-icon>confirmation_number</mat-icon>
-              </div>
+              <mat-icon class="kpi-icon-bare">confirmation_number</mat-icon>
             </div>
             <div class="kpi-card-body">
               <span class="kpi-label">Todos los Tickets</span>
@@ -245,9 +244,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
           <!-- Pending Tickets Card -->
           <div class="kpi-card card-pending" (click)="selectedStatus.set('in_progress')">
             <div class="kpi-card-header">
-              <div class="kpi-icon-box">
-                <mat-icon>hourglass_top</mat-icon>
-              </div>
+              <mat-icon class="kpi-icon-bare">hourglass_top</mat-icon>
             </div>
             <div class="kpi-card-body">
               <span class="kpi-label">Tickets Pendientes</span>
@@ -264,9 +261,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
           <!-- Completed Tickets Card -->
           <div class="kpi-card card-completed" (click)="selectedStatus.set('closed')">
             <div class="kpi-card-header">
-              <div class="kpi-icon-box">
-                <mat-icon>verified</mat-icon>
-              </div>
+              <mat-icon class="kpi-icon-bare">verified</mat-icon>
             </div>
             <div class="kpi-card-body">
               <span class="kpi-label">Tickets Completados</span>
@@ -284,9 +279,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
           <!-- Cancelled Tickets Card -->
           <div class="kpi-card card-cancelled">
             <div class="kpi-card-header">
-              <div class="kpi-icon-box">
-                <mat-icon>cancel</mat-icon>
-              </div>
+              <mat-icon class="kpi-icon-bare">cancel</mat-icon>
             </div>
             <div class="kpi-card-body">
               <span class="kpi-label">Tickets Cancelados</span>
@@ -924,29 +917,23 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
         background: linear-gradient(135deg, var(--sx-incubi-darkness) 0%, var(--sx-creeping-death) 100%);
       }
 
+      // Coral accent: tarjeta de pendientes con toque coral
       &.card-pending {
-        background: linear-gradient(135deg, var(--sx-grand-rapids) 0%, var(--sx-incubi-darkness) 100%);
+        background: linear-gradient(135deg, var(--sx-coral) 0%, #c0392b 100%);
       }
 
       &.card-completed {
-        background: linear-gradient(135deg, var(--sx-reef-waters) 0%, var(--sx-grand-rapids) 100%);
+        background: linear-gradient(135deg, var(--sx-grand-rapids) 0%, var(--sx-incubi-darkness) 100%);
       }
 
+      // Coral pleno: tarjeta cancelada usa coral + degradado cálido
       &.card-cancelled {
-        background: linear-gradient(135deg, var(--sx-ocean-eyes) 0%, var(--sx-reef-waters) 100%);
-        color: var(--sx-creeping-death);
-
-        .kpi-icon-box {
-          background: rgba(8, 20, 84, 0.12);
-
-          mat-icon {
-            color: var(--sx-creeping-death);
-          }
-        }
+        background: linear-gradient(135deg, #ff9a7b 0%, var(--sx-coral) 100%);
+        color: #ffffff;
 
         .stacked-avatars .avatar-circle {
-          color: var(--sx-grand-rapids);
-          border-color: rgba(77, 47, 178, 0.2);
+          color: var(--sx-coral);
+          border-color: rgba(255, 111, 97, 0.3);
         }
       }
     }
@@ -956,20 +943,12 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       align-items: center;
     }
 
-    .kpi-icon-box {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
+    // Ícono sin caja transparente
+    .kpi-icon-bare {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      opacity: 0.9;
     }
 
     .kpi-card-body {
@@ -1208,7 +1187,7 @@ export class DashboardPage implements OnInit {
   startDate = signal<string>('');
   endDate = signal<string>('');
   currentPage = signal<number>(1);
-  pageSize = 3;
+  pageSize = 8;
 
   private ticketImages = [
     '/features/tickets.png',

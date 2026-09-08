@@ -1,5 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { DashboardService, DashboardStats, TicketsTrend, CategoryCount, AgentCount } from '../../../core/services/dashboard.service';
@@ -17,7 +16,8 @@ export interface AgentPerformanceItem {
 @Component({
   selector: 'app-reports-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, MatIconModule, MatButtonModule, ChartComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIconModule, MatButtonModule, ChartComponent],
   template: `
     <!-- Reports Executive Header -->
     <div class="reports-header">
@@ -195,7 +195,7 @@ export interface AgentPerformanceItem {
           <h3>Distribución por Estado</h3>
         </div>
         <div class="status-chart-container">
-          <app-chart [type]="'doughnut'" [labels]="statusLabels" [data]="statusData()"></app-chart>
+          <app-chart [type]="'doughnut'" [labels]="statusLabels" [data]="statusData()" [colors]="statusColors"></app-chart>
         </div>
         <div class="status-summary-pills">
           <div class="pill open">
@@ -682,6 +682,7 @@ export class ReportsPage implements OnInit {
   trendDatasets = signal<{ label: string; data: number[]; color: string }[]>([]);
 
   statusLabels = ['Abiertos', 'En Proceso', 'Cerrados'];
+  statusColors = ['#0E21A0', '#FF6F61', '#4D2FB2'];  // Soportix palette: navy, coral, purple
   statusData = signal<number[]>([]);
 
   // Resolution Rate %

@@ -1,13 +1,15 @@
 <div class="app-layout-shell">
-  <!-- Left Sidebar Navigation -->
-  <aside class="sidebar-nav">
-    <div class="sidebar-header">
+  <!-- Left Sidebar Navigation — Vertical Navigation Rail -->
+  <aside class="sidebar-container">
+    <!-- TOP: Logo -->
+    <div class="sidebar-top">
       <a class="sidebar-brand" routerLink="/dashboard" matTooltip="Inicio" matTooltipPosition="right">
         <app-logo [size]="36" />
       </a>
     </div>
 
-    <nav class="sidebar-menu">
+    <!-- CENTER / MIDDLE: Navigation Menu -->
+    <nav class="sidebar-nav">
       @for (item of filteredOperationItems(); track item.route) {
         <a
           class="sidebar-item"
@@ -17,9 +19,7 @@
           [matTooltip]="item.label"
           matTooltipPosition="right"
         >
-          <div class="sidebar-icon-wrap">
-            <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
-          </div>
+          <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
         </a>
       }
 
@@ -33,15 +33,14 @@
             [matTooltip]="item.label"
             matTooltipPosition="right"
           >
-            <div class="sidebar-icon-wrap">
-              <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
-            </div>
+            <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
           </a>
         }
       }
     </nav>
 
-    <div class="sidebar-footer">
+    <!-- BOTTOM: User Avatar / Profile -->
+    <div class="sidebar-bottom">
       <div
         class="sidebar-user-avatar"
         [matMenuTriggerFor]="userMenu"

@@ -1,6 +1,4 @@
 // ─── App Shell ──────────────────────────────────────────────────────────────
-// Shell is a background container only; both sidebar and main-wrapper are
-// positioned independently (fixed) so they don't stretch each other.
 .app-layout-shell {
   height: 100vh;
   background: var(--sx-page-bg);
@@ -8,28 +6,37 @@
   overflow: hidden;
 }
 
-// ─── Left Sidebar — Floating Navigation Rail ────────────────────────────────
-// position:fixed removes it from document flow so its height is determined
-// solely by its own content (compact, pill-shaped capsule).
-.sidebar-nav {
+// ─── Left Sidebar — Vertical Navigation Rail ───────────────────────────────
+.sidebar-container {
   position: fixed;
-  top: 20px;
-  left: 16px;
+  top: 80px;
+  bottom: 80px;
+  left: 0;
   z-index: 100;
   width: 72px;
-  background: linear-gradient(180deg, var(--sx-creeping-death) 0%, var(--sx-incubi-darkness) 100%);
-  border-radius: 34px;
+  height: calc(100vh - 160px);
+  background: linear-gradient(180deg, var(--sx-creeping-death, #0e271f) 0%, var(--sx-incubi-darkness, #081712) 100%);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 32px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  padding: 18px 8px;
+  padding: 24px 12px;
   box-sizing: border-box;
-  box-shadow: 0 16px 48px rgba(8, 20, 84, 0.4), 0 4px 14px rgba(0, 0, 0, 0.14);
-  overflow: hidden; // clips active indicator at rounded corners
+  box-shadow: 4px 0 24px rgba(8, 20, 84, 0.25), 0 4px 14px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
 }
 
-.sidebar-header {
+// TOP Block: Logo
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .sidebar-brand {
@@ -39,87 +46,71 @@
   text-decoration: none;
   width: 44px;
   height: 44px;
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: background 0.2s ease, transform 0.2s ease;
+  border: none;
+  transition: transform 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.18);
-    transform: scale(1.05);
+    transform: scale(1.08);
   }
 }
 
-// NO flex:1 — the menu takes only as much height as its items need
-.sidebar-menu {
+// CENTER Block: Menú compacto
+.sidebar-nav {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   width: 100%;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   border-radius: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
 
-  .sidebar-icon-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
   .sidebar-icon {
-    font-size: 22px;
-    width: 22px;
-    height: 22px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   &:hover {
-    color: rgba(255, 255, 255, 0.95);
-
-    .sidebar-icon-wrap {
-      background: rgba(255, 255, 255, 0.18);
-      border-color: rgba(255, 255, 255, 0.14);
-    }
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
   }
 
-  &.sidebar-item-active {
-    color: var(--sx-incubi-darkness);
+  // Estado Activo: destacamos el botón con fondo sólido blanco
+  &.sidebar-item-active,
+  &.active {
+    color: var(--sx-incubi-darkness, #081712);
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 
-    .sidebar-icon-wrap {
-      background: #ffffff;
-      border-color: transparent;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-    }
-
-    // Indicator on the right inner wall — clipped cleanly by sidebar's border-radius
     &::before {
       content: '';
       position: absolute;
-      right: -4px; // sits just inside the sidebar's right boundary
+      left: -8px;
       top: 12px;
       bottom: 12px;
-      width: 3px;
-      background: var(--sx-reef-waters);
-      border-radius: 3px 0 0 3px;
+      width: 4px;
+      background: var(--sx-reef-waters, #76c043);
+      border-radius: 4px;
     }
   }
 }
@@ -128,17 +119,21 @@
   width: 28px;
   height: 1px;
   background: rgba(255, 255, 255, 0.15);
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
-// Small top gap separates avatar from last nav item
-.sidebar-footer {
-  margin-top: 10px;
+// BOTTOM Block: Avatar
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .sidebar-user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   border: 2px solid rgba(255, 255, 255, 0.25);
@@ -152,17 +147,16 @@
   transition: background 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.25);
     transform: scale(1.08);
   }
 }
 
-// ─── Right Main Area ────────────────────────────────────────────────────────
-// Fixed, starts right after the floating sidebar (16px left + 72px width + 16px gap = 104px)
+// ─── Right Main Area (Offset by 76px for the Sidebar) ───────────────────────
 .main-wrapper {
   position: fixed;
   top: 0;
-  left: 104px;
+  left: 76px;
   right: 0;
   bottom: 0;
   display: flex;
@@ -339,8 +333,7 @@
   overflow-x: hidden;
 }
 
-// ─── Tablet Breakpoint (≤960px) ──────────────────────────────────────────────
-// Sidebar goes back into the document flow as a horizontal top bar
+// ─── Responsive Tablet Breakpoint (≤960px) ──────────────────────────────────
 @media (max-width: 960px) {
   .app-layout-shell {
     display: flex;
@@ -349,8 +342,7 @@
     overflow: hidden;
   }
 
-  .sidebar-nav {
-    // Back to flow — horizontal pill at the top
+  .sidebar-container {
     position: static;
     width: auto;
     height: auto;
@@ -360,21 +352,22 @@
     padding: 0.5rem 0.75rem;
     overflow: hidden;
 
-    .sidebar-header {
+    .sidebar-top {
       margin-bottom: 0;
       margin-right: 8px;
     }
 
-    .sidebar-menu {
+    .sidebar-nav {
       flex-direction: row;
       justify-content: center;
       flex: 1;
       gap: 4px;
     }
 
-    .sidebar-footer {
+    .sidebar-bottom {
       margin-top: 0;
       margin-left: auto;
+      padding-top: 0;
     }
 
     .sidebar-divider {
@@ -392,14 +385,13 @@
         height: 38px;
       }
 
-      // In horizontal mode the white bubble is enough; hide the line indicator
-      &.sidebar-item-active::before {
+      &.sidebar-item-active::before,
+      &.active::before {
         display: none;
       }
     }
   }
 
-  // Back to flow for main wrapper
   .main-wrapper {
     position: static;
     flex: 1;

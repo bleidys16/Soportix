@@ -102,7 +102,7 @@ export class ChartComponent implements AfterViewInit, OnChanges {
       datasets: [{
         label: this.label,
         data: this.data,
-        backgroundColor: this.colors.length ? this.colors : ['#4caf50', '#ff9800', '#9e9e9e'],
+        backgroundColor: this.colors.length ? this.colors : ['#0E21A0', '#FF6F61', '#4D2FB2'],
         borderWidth: 1,
       }],
     };
