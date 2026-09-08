@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatTableModule } from '@angular/material/table';
@@ -56,6 +56,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
 export class TicketListPage implements OnInit {
   private ticketService = inject(TicketService);
   private breakpointObserver = inject(BreakpointObserver);
+  private route = inject(ActivatedRoute);
   protected auth = inject(AuthService);
 
   tickets = signal<Ticket[]>([]);
@@ -70,6 +71,10 @@ export class TicketListPage implements OnInit {
   displayedColumns = signal(this.allColumns);
 
   ngOnInit() {
+    const searchParam = this.route.snapshot.queryParamMap.get('search');
+    if (searchParam) {
+      this.filters.search = searchParam;
+    }
     this.loadTickets();
     this.breakpointObserver.observe('(max-width: 768px)').subscribe(({ matches }) => {
       this.displayedColumns.set(matches ? this.compactColumns : this.allColumns);

@@ -310,16 +310,16 @@ export interface AgentPerformanceItem {
         .kpi-icon-wrapper { background: rgba(14, 33, 160, 0.1); color: var(--sx-incubi-darkness); }
       }
       &.card-green {
-        border-top: 4px solid #10b981;
-        .kpi-icon-wrapper { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-      }
-      &.card-purple {
         border-top: 4px solid var(--sx-grand-rapids);
         .kpi-icon-wrapper { background: rgba(77, 47, 178, 0.1); color: var(--sx-grand-rapids); }
       }
+      &.card-purple {
+        border-top: 4px solid var(--sx-reef-waters);
+        .kpi-icon-wrapper { background: rgba(155, 142, 199, 0.15); color: var(--sx-reef-waters); }
+      }
       &.card-amber {
-        border-top: 4px solid #f59e0b;
-        .kpi-icon-wrapper { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        border-top: 4px solid var(--sx-coral);
+        .kpi-icon-wrapper { background: rgba(255, 111, 97, 0.12); color: var(--sx-coral); }
       }
     }
 
@@ -374,7 +374,7 @@ export interface AgentPerformanceItem {
         display: inline-flex;
         align-items: center;
         gap: 2px;
-        color: #10b981;
+        color: var(--sx-grand-rapids);
         font-weight: 700;
 
         mat-icon {
@@ -389,8 +389,8 @@ export interface AgentPerformanceItem {
       }
 
       .sla-badge {
-        background: #e0f2fe;
-        color: #0369a1;
+        background: rgba(199, 204, 240, 0.4);
+        color: var(--sx-incubi-darkness);
         font-weight: 700;
         padding: 2px 8px;
         border-radius: 6px;
@@ -407,7 +407,7 @@ export interface AgentPerformanceItem {
 
       .progress-fill {
         height: 100%;
-        background: #10b981;
+        background: linear-gradient(90deg, var(--sx-grand-rapids), var(--sx-reef-waters));
         border-radius: 4px;
         transition: width 0.4s ease;
       }
@@ -423,7 +423,7 @@ export interface AgentPerformanceItem {
         font-size: 16px;
         width: 16px;
         height: 16px;
-        color: #f59e0b;
+        color: var(--sx-coral);
       }
 
       .csat-count {
@@ -488,7 +488,7 @@ export interface AgentPerformanceItem {
         }
 
         &.created .dot { background: var(--sx-incubi-darkness); }
-        &.closed .dot { background: #10b981; }
+        &.closed .dot { background: var(--sx-coral); }
       }
     }
 
@@ -593,8 +593,8 @@ export interface AgentPerformanceItem {
       }
 
       .resolved-badge {
-        background: #ecfdf5;
-        color: #047857;
+        background: rgba(77, 47, 178, 0.1);
+        color: var(--sx-grand-rapids);
         font-weight: 700;
         padding: 2px 8px;
         border-radius: 6px;
@@ -614,7 +614,7 @@ export interface AgentPerformanceItem {
 
           .mini-bar-fill {
             height: 100%;
-            background: var(--sx-incubi-darkness);
+            background: linear-gradient(90deg, var(--sx-grand-rapids), var(--sx-reef-waters));
             border-radius: 3px;
           }
         }
@@ -655,9 +655,9 @@ export interface AgentPerformanceItem {
           margin-top: 2px;
         }
 
-        &.open { background: #f0fdf4; border-color: #bbf7d0; }
-        &.progress { background: #fff7ed; border-color: #ffedd5; }
-        &.closed { background: #f8fafc; border-color: #e2e8f0; }
+        &.open { background: rgba(199, 204, 240, 0.25); border-color: var(--sx-ocean-eyes); }
+        &.progress { background: rgba(255, 111, 97, 0.1); border-color: rgba(255, 111, 97, 0.35); }
+        &.closed { background: rgba(155, 142, 199, 0.1); border-color: var(--sx-reef-waters); }
       }
     }
 
@@ -715,7 +715,7 @@ export class ReportsPage implements OnInit {
     });
   });
 
-  private categoryColors = ['#0e21a0', '#4d2fb2', '#9b8ec7', '#10b981', '#f59e0b', '#64748b'];
+  private categoryColors = ['#0E21A0', '#4D2FB2', '#9B8EC7', '#C7CCF0', '#FF6F61', '#081454'];
 
   ngOnInit() {
     this.dashboardService.getStats().subscribe((s) => {
@@ -755,7 +755,7 @@ export class ReportsPage implements OnInit {
     this.trendLabels.set(days.map((d) => new Date(d).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })));
     this.trendDatasets.set([
       { label: 'Creados', data: days.map((d) => createdMap.get(d) ?? 0), color: '#0e21a0' },
-      { label: 'Cerrados', data: days.map((d) => closedMap.get(d) ?? 0), color: '#10b981' },
+      { label: 'Cerrados', data: days.map((d) => closedMap.get(d) ?? 0), color: '#FF6F61' },
     ]);
   }
 

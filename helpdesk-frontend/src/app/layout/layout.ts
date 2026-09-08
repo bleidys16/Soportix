@@ -1,30 +1,24 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { TitleCasePipe, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { map } from 'rxjs/operators';
 import { AuthService } from '../core/auth/auth';
 import { LogoComponent } from '../core/components/logo/logo';
+import { NotificationService, AppNotification } from '../core/services/notification.service';
 
 interface NavItem {
   label: string;
   icon: string;
   route: string;
   roles: string[];
-}
-
-export interface NotificationItem {
-  id: number;
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-  type: 'ticket' | 'system' | 'user';
 }
 
 const MOBILE_BREAKPOINT = '(max-width: 960px)';
@@ -38,17 +32,21 @@ const MOBILE_BREAKPOINT = '(max-width: 960px)';
     RouterLinkActive,
     TitleCasePipe,
     DatePipe,
+    FormsModule,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
+    MatTooltipModule,
     LogoComponent,
   ],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
 })
-export class Layout {
+export class Layout implements OnInit {
+  private router = inject(Router);
   private breakpointObserver = inject(BreakpointObserver);
+  private notificationService = inject(NotificationService);
 
   protected readonly isMobile = toSignal(
     this.breakpointObserver.observe(MOBILE_BREAKPOINT).pipe(map((r) => r.matches)),
@@ -57,35 +55,12 @@ export class Layout {
 
   protected readonly mobileMenuOpen = signal(false);
 
-  // Lista interactiva de Notificaciones
-  notifications = signal<NotificationItem[]>([
-    {
-      id: 1,
-      title: 'Nuevo Ticket Asignado',
-      message: 'Se te ha asignado el ticket #ST081 - Conexión de Red',
-      time: 'Hace 10 min',
-      read: false,
-      type: 'ticket',
-    },
-    {
-      id: 2,
-      title: 'Respuesta Recibida',
-      message: 'El cliente adjuntó captura de pantalla al ticket #ST082',
-      time: 'Hace 1 hora',
-      read: false,
-      type: 'user',
-    },
-    {
-      id: 3,
-      title: 'Mantenimiento del Sistema',
-      message: 'Servicio optimizado correctamente en PostgreSQL Neon',
-      time: 'Hace 3 horas',
-      read: true,
-      type: 'system',
-    },
-  ]);
+  // Header search
+  headerSearch = signal('');
 
-  unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
+  // Notificaciones desde el API real
+  notifications = signal<AppNotification[]>([]);
+  unreadCount = computed(() => this.notifications().filter((n) => !n.is_read).length);
 
   protected readonly operationItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: ['admin', 'agent', 'user'] },
@@ -118,14 +93,49 @@ export class Layout {
 
   constructor(private auth: AuthService) {}
 
+  ngOnInit() {
+    this.loadNotifications();
+  }
+
+  loadNotifications() {
+    this.notificationService.getAll().subscribe({
+      next: (list) => this.notifications.set(list),
+      error: () => {},
+    });
+  }
+
   markAllNotificationsAsRead(): void {
-    this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
+    this.notificationService.markAllRead().subscribe({
+      next: () => {
+        this.notifications.update((list) => list.map((n) => ({ ...n, is_read: true })));
+      },
+      error: () => {},
+    });
   }
 
   markNotificationAsRead(id: number): void {
-    this.notifications.update((list) =>
-      list.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    this.notificationService.markRead(id).subscribe({
+      next: () => {
+        this.notifications.update((list) =>
+          list.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+        );
+      },
+      error: () => {},
+    });
+  }
+
+  getNotifIcon(n: AppNotification): string {
+    const t = n.notification_type ?? '';
+    if (t.includes('ticket') || t.includes('assign')) return 'confirmation_number';
+    if (t.includes('comment') || t.includes('reply')) return 'person';
+    return 'info';
+  }
+
+  performSearch(query: string) {
+    const q = query.trim();
+    if (!q) return;
+    this.headerSearch.set('');
+    this.router.navigate(['/tickets'], { queryParams: { search: q } });
   }
 
   toggleMobileMenu(): void {
@@ -140,4 +150,3 @@ export class Layout {
     this.auth.logout();
   }
 }
-

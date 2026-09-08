@@ -1,9 +1,11 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../../core/auth/auth';
 import { DashboardService, DashboardStats, CategoryCount } from '../../../core/services/dashboard.service';
 import { TicketService } from '../../../core/services/ticket.service';
@@ -16,6 +18,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
   standalone: true,
   imports: [
     RouterLink, DatePipe, DecimalPipe, FormsModule, MatIconModule, MatButtonModule,
+    MatMenuModule, MatTooltipModule,
     StatusBadgeComponent, PriorityTagComponent,
   ],
   template: `
@@ -105,15 +108,25 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
                       <div>
                         <div class="creator-name-row">
                           <span class="creator-name">{{ t.created_by_username || 'Usuario' }}</span>
-                          <span class="ticket-code">#ST08{{ t.id }}</span>
+                          <span class="ticket-code">{{ ticketCode(t.id) }}</span>
                           <app-priority-tag [priority]="t.priority" />
                         </div>
                         <span class="ticket-date">{{ t.created_at | date:'E, dd MMM hh:mm a' }}</span>
                       </div>
                     </div>
-                    <button mat-icon-button class="more-options-btn" (click)="$event.stopPropagation()">
+                    <button mat-icon-button class="more-options-btn" [matMenuTriggerFor]="cardMenu" (click)="$event.stopPropagation()">
                       <mat-icon>more_vert</mat-icon>
                     </button>
+                    <mat-menu #cardMenu="matMenu">
+                      <a mat-menu-item [routerLink]="['/tickets', t.id]">
+                        <mat-icon>open_in_new</mat-icon>
+                        <span>Ver detalle</span>
+                      </a>
+                      <button mat-menu-item (click)="copyTicketCode(t.id)">
+                        <mat-icon>content_copy</mat-icon>
+                        <span>Copiar código</span>
+                      </button>
+                    </mat-menu>
                   </div>
 
                   <div class="ticket-subject">
@@ -133,7 +146,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
                       <app-status-badge [status]="t.status" />
                     </div>
                     <div class="meta-item">
-                      <span class="meta-label">Fecha de Cierre</span>
+                      <span class="meta-label">Actualizado</span>
                       <div class="date-val">
                         <mat-icon class="date-icon">event</mat-icon>
                         <span>{{ t.updated_at | date:'dd-MM-yyyy' }}</span>
@@ -169,7 +182,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
               <tbody>
                 @for (t of displayedTickets(); track t.id) {
                   <tr [routerLink]="['/tickets', t.id]">
-                    <td class="td-code">#ST08{{ t.id }}</td>
+                    <td class="td-code">{{ ticketCode(t.id) }}</td>
                     <td class="td-title"><strong>{{ t.title }}</strong></td>
                     <td class="td-user">{{ t.created_by_username || 'Usuario' }}</td>
                     <td class="td-cat">{{ t.category_name || 'General' }}</td>
@@ -192,8 +205,8 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
         <!-- Pagination Footer -->
         <div class="tickets-pagination">
           <div class="nav-btn-group">
-            <button class="pag-btn" [disabled]="currentPage() === 1" (click)="changePage(-1)">Prev</button>
-            <button class="pag-btn active" [disabled]="currentPage() * pageSize >= filteredTickets().length" (click)="changePage(1)">Next</button>
+            <button class="pag-btn" [disabled]="currentPage() === 1" (click)="changePage(-1)">Anterior</button>
+            <button class="pag-btn active" [disabled]="currentPage() * pageSize >= filteredTickets().length" (click)="changePage(1)">Siguiente</button>
           </div>
           <div class="page-numbers">
             <span class="pag-nav-arrow" (click)="setPage(1)">&laquo;</span>
@@ -442,9 +455,10 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     // ─── Main 2-Column Grid Layout ────────────────────────────────────────────
     .dashboard-main-grid {
       display: grid;
-      grid-template-columns: 1fr 440px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
       gap: 1.5rem;
       align-items: start;
+      width: 100%;
     }
 
     // ─── LEFT COLUMN: Tickets Section ─────────────────────────────────────────
@@ -911,15 +925,29 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       }
 
       &.card-pending {
-        background: linear-gradient(135deg, var(--sx-grand-rapids) 0%, #6841E3 100%);
+        background: linear-gradient(135deg, var(--sx-grand-rapids) 0%, var(--sx-incubi-darkness) 100%);
       }
 
       &.card-completed {
-        background: linear-gradient(135deg, #1B8A5A 0%, #115C3B 100%);
+        background: linear-gradient(135deg, var(--sx-reef-waters) 0%, var(--sx-grand-rapids) 100%);
       }
 
       &.card-cancelled {
-        background: linear-gradient(135deg, var(--sx-reef-waters) 0%, #8072B0 100%);
+        background: linear-gradient(135deg, var(--sx-ocean-eyes) 0%, var(--sx-reef-waters) 100%);
+        color: var(--sx-creeping-death);
+
+        .kpi-icon-box {
+          background: rgba(8, 20, 84, 0.12);
+
+          mat-icon {
+            color: var(--sx-creeping-death);
+          }
+        }
+
+        .stacked-avatars .avatar-circle {
+          color: var(--sx-grand-rapids);
+          border-color: rgba(77, 47, 178, 0.2);
+        }
       }
     }
 
@@ -1117,9 +1145,48 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       }
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: 1100px) {
       .dashboard-main-grid {
         grid-template-columns: 1fr;
+      }
+
+      .kpi-cards-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .kpi-cards-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .ticket-card {
+        flex-direction: column;
+        gap: 0.75rem;
+
+        .ticket-card-thumb {
+          width: 100%;
+          height: 140px;
+        }
+      }
+
+      .tickets-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .tickets-header-controls {
+        width: 100%;
+        justify-content: flex-start;
+
+        .date-range-filter {
+          flex-wrap: wrap;
+        }
+      }
+
+      .ticket-card-meta {
+        flex-wrap: wrap;
+        gap: 0.75rem;
       }
     }
   `]
@@ -1128,6 +1195,7 @@ export class DashboardPage implements OnInit {
   protected auth = inject(AuthService);
   private dashboardService = inject(DashboardService);
   private ticketService = inject(TicketService);
+  private router = inject(Router);
 
   stats = signal<DashboardStats>({ total: 0, open: 0, in_progress: 0, closed: 0, avg_close_days: null });
   topCategories = signal<CategoryCount[]>([]);
@@ -1217,6 +1285,14 @@ export class DashboardPage implements OnInit {
     return this.ticketImages[id % this.ticketImages.length];
   }
 
+  ticketCode(id: number): string {
+    return `#${String(id).padStart(5, '0')}`;
+  }
+
+  copyTicketCode(id: number): void {
+    navigator.clipboard.writeText(this.ticketCode(id)).catch(() => {});
+  }
+
   clearDates() {
     this.startDate.set('');
     this.endDate.set('');
@@ -1242,7 +1318,7 @@ export class DashboardPage implements OnInit {
 
     const headers = ['ID', 'Titulo', 'Estado', 'Prioridad', 'Solicitante', 'Asignado', 'Fecha Creacion'];
     const rows = tickets.map((t) => [
-      `#ST08${t.id}`,
+      this.ticketCode(t.id),
       `"${(t.title || '').replace(/"/g, '""')}"`,
       t.status,
       t.priority,

@@ -2,8 +2,8 @@
   <!-- Left Sidebar Navigation -->
   <aside class="sidebar-nav">
     <div class="sidebar-header">
-      <a class="sidebar-brand" routerLink="/dashboard">
-        <app-logo [size]="38" />
+      <a class="sidebar-brand" routerLink="/dashboard" matTooltip="Inicio" matTooltipPosition="right">
+        <app-logo [size]="36" />
       </a>
     </div>
 
@@ -14,10 +14,12 @@
           [routerLink]="item.route"
           routerLinkActive="sidebar-item-active"
           [routerLinkActiveOptions]="{ exact: item.route === '/tickets' }"
-          [attr.title]="item.label"
+          [matTooltip]="item.label"
+          matTooltipPosition="right"
         >
-          <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
-          <span class="sidebar-label">{{ item.label }}</span>
+          <div class="sidebar-icon-wrap">
+            <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
+          </div>
         </a>
       }
 
@@ -28,17 +30,24 @@
             class="sidebar-item"
             [routerLink]="item.route"
             routerLinkActive="sidebar-item-active"
-            [attr.title]="item.label"
+            [matTooltip]="item.label"
+            matTooltipPosition="right"
           >
-            <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
-            <span class="sidebar-label">{{ item.label }}</span>
+            <div class="sidebar-icon-wrap">
+              <mat-icon class="sidebar-icon">{{ item.icon }}</mat-icon>
+            </div>
           </a>
         }
       }
     </nav>
 
     <div class="sidebar-footer">
-      <div class="sidebar-user-avatar" [matMenuTriggerFor]="userMenu">
+      <div
+        class="sidebar-user-avatar"
+        [matMenuTriggerFor]="userMenu"
+        [matTooltip]="username() ?? ''"
+        matTooltipPosition="right"
+      >
         {{ initials() }}
       </div>
     </div>
@@ -50,7 +59,18 @@
     <header class="top-header">
       <div class="header-search">
         <mat-icon class="search-icon">search</mat-icon>
-        <input type="text" placeholder="Buscar usuario, tickets o eventos..." class="search-input" />
+        <input
+          type="text"
+          placeholder="Buscar tickets..."
+          class="search-input"
+          [(ngModel)]="headerSearch"
+          (keyup.enter)="performSearch(headerSearch())"
+        />
+        @if (headerSearch()) {
+          <button class="search-clear-btn" (click)="headerSearch.set('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </div>
 
       <div class="header-actions">
@@ -72,12 +92,12 @@
           <mat-divider></mat-divider>
           <div class="notif-list">
             @for (n of notifications(); track n.id) {
-              <div class="notif-item" [class.unread]="!n.read" (click)="markNotificationAsRead(n.id)">
-                <mat-icon class="notif-icon">{{ n.type === 'ticket' ? 'confirmation_number' : n.type === 'user' ? 'person' : 'info' }}</mat-icon>
+              <div class="notif-item" [class.unread]="!n.is_read" (click)="markNotificationAsRead(n.id)">
+                <mat-icon class="notif-icon">{{ getNotifIcon(n) }}</mat-icon>
                 <div class="notif-body">
-                  <span class="notif-title">{{ n.title }}</span>
+                  <span class="notif-title">{{ n.ticket_title ?? 'Notificación' }}</span>
                   <span class="notif-msg">{{ n.message }}</span>
-                  <span class="notif-time">{{ n.time }}</span>
+                  <span class="notif-time">{{ n.created_at | date:'dd MMM, HH:mm' }}</span>
                 </div>
               </div>
             } @empty {
@@ -106,10 +126,12 @@
               <span>Gestión de Categorías</span>
             </a>
           }
-          <a mat-menu-item routerLink="/respuestas">
-            <mat-icon>quickreply</mat-icon>
-            <span>Respuestas Rápidas</span>
-          </a>
+          @if (userRole() === 'admin' || userRole() === 'agent') {
+            <a mat-menu-item routerLink="/respuestas">
+              <mat-icon>quickreply</mat-icon>
+              <span>Respuestas Rápidas</span>
+            </a>
+          }
           <mat-divider></mat-divider>
           <button mat-menu-item (click)="logout()">
             <mat-icon class="text-danger">logout</mat-icon>
@@ -144,5 +166,3 @@
     </main>
   </div>
 </div>
-
-

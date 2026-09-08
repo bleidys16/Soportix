@@ -75,6 +75,7 @@ html {
   --sx-grand-rapids: #4D2FB2;
   --sx-incubi-darkness: #0E21A0;
   --sx-creeping-death: #081454;
+  --sx-coral: #FF6F61;            // Acento cálido / alta prioridad
 
   // Asignaciones de Marca
   --sx-primary: var(--sx-incubi-darkness);
@@ -104,31 +105,24 @@ html {
   --sx-status-closed-fg: #55596b;
 
   // Prioridad de ticket
-  --sx-priority-low-bg: #e8f5e9;
-  --sx-priority-low-fg: #2e7d32;
-  --sx-priority-medium-bg: #fff3e0;
-  --sx-priority-medium-fg: #e65100;
-  --sx-priority-high-bg: #fbe9e7;
-  --sx-priority-high-fg: #c62828;
+  --sx-priority-low-bg: rgba(199, 204, 240, 0.35);
+  --sx-priority-low-fg: var(--sx-grand-rapids);
+  --sx-priority-medium-bg: rgba(155, 142, 199, 0.25);
+  --sx-priority-medium-fg: var(--sx-incubi-darkness);
+  --sx-priority-high-bg: rgba(255, 111, 97, 0.15);
+  --sx-priority-high-fg: #c9392d;
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
   font-family: 'Geist', 'Roboto', sans-serif;
-
-  // Reset the user agent margin.
   margin: 0;
   height: 100%;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 /* You can add global styles to this file, and also import other style files */
 

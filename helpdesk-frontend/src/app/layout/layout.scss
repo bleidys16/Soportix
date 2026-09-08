@@ -1,28 +1,35 @@
+// ─── App Shell ──────────────────────────────────────────────────────────────
+// Shell is a background container only; both sidebar and main-wrapper are
+// positioned independently (fixed) so they don't stretch each other.
 .app-layout-shell {
-  display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--sx-page-bg);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-// ─── Left Sidebar Navigation ────────────────────────────────────────────────
+// ─── Left Sidebar — Floating Navigation Rail ────────────────────────────────
+// position:fixed removes it from document flow so its height is determined
+// solely by its own content (compact, pill-shaped capsule).
 .sidebar-nav {
-  width: 76px;
+  position: fixed;
+  top: 20px;
+  left: 16px;
+  z-index: 100;
+  width: 72px;
   background: linear-gradient(180deg, var(--sx-creeping-death) 0%, var(--sx-incubi-darkness) 100%);
-  margin: 12px 0 12px 12px;
-  border-radius: 20px;
+  border-radius: 34px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1.25rem 0.5rem;
+  padding: 18px 8px;
   box-sizing: border-box;
-  box-shadow: 0 8px 30px rgba(8, 20, 84, 0.25);
-  z-index: 100;
-  flex-shrink: 0;
+  box-shadow: 0 16px 48px rgba(8, 20, 84, 0.4), 0 4px 14px rgba(0, 0, 0, 0.14);
+  overflow: hidden; // clips active indicator at rounded corners
 }
 
 .sidebar-header {
-  margin-bottom: 2rem;
+  margin-bottom: 16px;
 }
 
 .sidebar-brand {
@@ -32,87 +39,109 @@
   text-decoration: none;
   width: 44px;
   height: 44px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  transition: transform 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.2s ease, transform 0.2s ease;
 
   &:hover {
+    background: rgba(255, 255, 255, 0.18);
     transform: scale(1.05);
   }
 }
 
+// NO flex:1 — the menu takes only as much height as its items need
 .sidebar-menu {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
   width: 100%;
-  flex: 1;
 }
 
 .sidebar-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
   position: relative;
 
-  .sidebar-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
+  .sidebar-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .sidebar-label {
-    display: none; // Icon view matching mockup
+  .sidebar-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.95);
+
+    .sidebar-icon-wrap {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
   }
 
   &.sidebar-item-active {
-    background: #ffffff;
     color: var(--sx-incubi-darkness);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 
+    .sidebar-icon-wrap {
+      background: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    // Indicator on the right inner wall — clipped cleanly by sidebar's border-radius
     &::before {
       content: '';
       position: absolute;
-      left: -8px;
+      right: -4px; // sits just inside the sidebar's right boundary
       top: 12px;
       bottom: 12px;
-      width: 4px;
+      width: 3px;
       background: var(--sx-reef-waters);
-      border-radius: 0 4px 4px 0;
+      border-radius: 3px 0 0 3px;
     }
   }
 }
 
 .sidebar-divider {
-  width: 24px;
+  width: 28px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   margin: 6px 0;
 }
 
+// Small top gap separates avatar from last nav item
 .sidebar-footer {
-  margin-top: auto;
-  padding-top: 1rem;
+  margin-top: 10px;
 }
 
 .sidebar-user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--sx-reef-waters);
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.875rem;
@@ -120,20 +149,25 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: transform 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
 
   &:hover {
+    background: rgba(255, 255, 255, 0.22);
     transform: scale(1.08);
   }
 }
 
 // ─── Right Main Area ────────────────────────────────────────────────────────
+// Fixed, starts right after the floating sidebar (16px left + 72px width + 16px gap = 104px)
 .main-wrapper {
-  flex: 1;
+  position: fixed;
+  top: 0;
+  left: 104px;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  overflow: hidden;
 }
 
 // ─── Top Header ─────────────────────────────────────────────────────────────
@@ -141,28 +175,38 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.75rem;
+  padding: 1rem 1.5rem;
   background: transparent;
-  gap: 1.5rem;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .header-search {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: #ffffff;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border-radius: 24px;
-  width: 100%;
-  max-width: 460px;
+  flex: 1;
+  max-width: 420px;
+  min-width: 0;
   box-shadow: 0 2px 10px rgba(8, 20, 84, 0.04);
   border: 1px solid var(--sx-border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--sx-grand-rapids);
+    box-shadow: 0 2px 12px rgba(77, 47, 178, 0.12);
+  }
 
   .search-icon {
     color: var(--sx-text-muted);
     font-size: 20px;
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
   }
 
   .search-input {
@@ -170,6 +214,7 @@
     outline: none;
     background: transparent;
     width: 100%;
+    min-width: 0;
     font-size: 0.875rem;
     color: var(--sx-text-primary);
 
@@ -177,12 +222,34 @@
       color: var(--sx-text-muted);
     }
   }
+
+  .search-clear-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    color: var(--sx-text-muted);
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      color: var(--sx-creeping-death);
+    }
+  }
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .header-action-btn {
@@ -191,6 +258,7 @@
   background: #ffffff !important;
   border-radius: 50% !important;
   box-shadow: 0 2px 8px rgba(8, 20, 84, 0.05);
+  flex-shrink: 0;
 
   .notification-badge {
     position: absolute;
@@ -219,7 +287,9 @@
   border-radius: 24px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(8, 20, 84, 0.04);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+  max-width: 200px;
 
   &:hover {
     border-color: var(--sx-grand-rapids);
@@ -237,12 +307,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
   .user-name {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--sx-creeping-death);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
   }
 
   .chevron {
@@ -250,48 +325,107 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
+    flex-shrink: 0;
   }
 }
 
 // ─── Main Page Content ──────────────────────────────────────────────────────
 .page-content {
   flex: 1;
-  padding: 0 1.75rem 1.75rem;
+  padding: 0 1.5rem 1.5rem;
   box-sizing: border-box;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
+// ─── Tablet Breakpoint (≤960px) ──────────────────────────────────────────────
+// Sidebar goes back into the document flow as a horizontal top bar
 @media (max-width: 960px) {
   .app-layout-shell {
+    display: flex;
     flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .sidebar-nav {
+    // Back to flow — horizontal pill at the top
+    position: static;
     width: auto;
     height: auto;
-    margin: 10px;
+    margin: 10px 10px 0;
+    border-radius: 18px;
     flex-direction: row;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
+    overflow: hidden;
+
+    .sidebar-header {
+      margin-bottom: 0;
+      margin-right: 8px;
+    }
 
     .sidebar-menu {
       flex-direction: row;
       justify-content: center;
+      flex: 1;
+      gap: 4px;
     }
 
     .sidebar-footer {
       margin-top: 0;
-      padding-top: 0;
       margin-left: auto;
     }
 
     .sidebar-divider {
       width: 1px;
-      height: 24px;
-      margin: 0 6px;
+      height: 28px;
+      margin: 0 4px;
+    }
+
+    .sidebar-item {
+      width: 44px;
+      height: 44px;
+
+      .sidebar-icon-wrap {
+        width: 38px;
+        height: 38px;
+      }
+
+      // In horizontal mode the white bubble is enough; hide the line indicator
+      &.sidebar-item-active::before {
+        display: none;
+      }
     }
   }
 
+  // Back to flow for main wrapper
+  .main-wrapper {
+    position: static;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .top-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .user-name {
+    display: none;
+  }
+
   .page-content {
-    padding: 1rem;
+    padding: 0 1rem 1rem;
   }
 }
 
+@media (max-width: 480px) {
+  .header-search {
+    max-width: 160px;
+  }
+
+  .user-profile-btn .user-name {
+    display: none;
+  }
+}
