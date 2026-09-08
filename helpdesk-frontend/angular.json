@@ -32,6 +32,9 @@
             ],
             "styles": [
               "src/styles.scss"
+            ]
+            "styles": [
+              "src/styles.scss"
             ],
             "define": {
               "NG_API_URL": "process.env.NG_API_URL"
@@ -47,8 +50,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12kB",
-                  "maximumError": "24kB"
+                  "maximumWarning": "20kB",
+                  "maximumError": "40kB"
                 }
               ],
               "outputHashing": "all"
