@@ -55,15 +55,67 @@
 
       <div class="header-actions">
         <!-- Notificaciones -->
-        <button mat-icon-button class="header-action-btn" aria-label="Notificaciones">
+        <button mat-icon-button class="header-action-btn" [matMenuTriggerFor]="notifMenu" aria-label="Notificaciones">
           <mat-icon>notifications</mat-icon>
-          <span class="notification-badge">2</span>
+          @if (unreadCount() > 0) {
+            <span class="notification-badge">{{ unreadCount() }}</span>
+          }
         </button>
 
-        <!-- Configuración -->
-        <button mat-icon-button class="header-action-btn" aria-label="Configuración">
+        <mat-menu #notifMenu="matMenu" xPosition="before" class="notifications-popover">
+          <div class="notif-header">
+            <h4>Notificaciones</h4>
+            @if (unreadCount() > 0) {
+              <button mat-button class="mark-all-btn" (click)="markAllNotificationsAsRead(); $event.stopPropagation()">Marcar leídas</button>
+            }
+          </div>
+          <mat-divider></mat-divider>
+          <div class="notif-list">
+            @for (n of notifications(); track n.id) {
+              <div class="notif-item" [class.unread]="!n.read" (click)="markNotificationAsRead(n.id)">
+                <mat-icon class="notif-icon">{{ n.type === 'ticket' ? 'confirmation_number' : n.type === 'user' ? 'person' : 'info' }}</mat-icon>
+                <div class="notif-body">
+                  <span class="notif-title">{{ n.title }}</span>
+                  <span class="notif-msg">{{ n.message }}</span>
+                  <span class="notif-time">{{ n.time }}</span>
+                </div>
+              </div>
+            } @empty {
+              <p class="empty-notif">No tienes notificaciones pendientes.</p>
+            }
+          </div>
+        </mat-menu>
+
+        <!-- Configuración / Ajustes -->
+        <button mat-icon-button class="header-action-btn" [matMenuTriggerFor]="settingsMenu" aria-label="Configuración">
           <mat-icon>settings</mat-icon>
         </button>
+
+        <mat-menu #settingsMenu="matMenu" xPosition="before" class="settings-popover">
+          <div class="menu-header">
+            <p class="header-name">Ajustes Rápidos</p>
+          </div>
+          <mat-divider></mat-divider>
+          @if (userRole() === 'admin') {
+            <a mat-menu-item routerLink="/admin/usuarios">
+              <mat-icon>manage_accounts</mat-icon>
+              <span>Gestión de Usuarios</span>
+            </a>
+            <a mat-menu-item routerLink="/admin/categorias">
+              <mat-icon>category</mat-icon>
+              <span>Gestión de Categorías</span>
+            </a>
+          }
+          <a mat-menu-item routerLink="/respuestas">
+            <mat-icon>quickreply</mat-icon>
+            <span>Respuestas Rápidas</span>
+          </a>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon class="text-danger">logout</mat-icon>
+            <span>Cerrar sesión</span>
+          </button>
+        </mat-menu>
 
         <!-- User Profile Trigger -->
         <button class="user-profile-btn" [matMenuTriggerFor]="userMenu" aria-label="Menú de usuario">
@@ -92,4 +144,5 @@
     </main>
   </div>
 </div>
+
 

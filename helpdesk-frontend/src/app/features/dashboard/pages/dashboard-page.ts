@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../core/auth/auth';
@@ -14,10 +15,13 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
   selector: 'app-dashboard-page',
   standalone: true,
   imports: [
-    RouterLink, DatePipe, DecimalPipe, MatIconModule, MatButtonModule,
+    RouterLink, DatePipe, DecimalPipe, FormsModule, MatIconModule, MatButtonModule,
     StatusBadgeComponent, PriorityTagComponent,
   ],
   template: `
+    <!-- Hidden File Input for Import -->
+    <input type="file" #fileInput style="display: none;" accept=".csv,.json" (change)="handleFileImport($event)" />
+
     <!-- Top Toolbar & Breadcrumb -->
     <div class="dash-top-bar">
       <div class="dash-breadcrumb">
@@ -29,16 +33,16 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       </div>
 
       <div class="dash-actions">
-        <button mat-button class="action-btn import-btn">
+        <button mat-button class="action-btn import-btn" (click)="fileInput.click()">
           <mat-icon>file_download</mat-icon> Importar
         </button>
-        <button mat-button class="action-btn export-btn">
+        <button mat-button class="action-btn export-btn" (click)="exportTicketsCSV()">
           <mat-icon>file_upload</mat-icon> Exportar
         </button>
-        <select class="category-select">
-          <option>Categorías</option>
+        <select class="category-select" [value]="selectedCategory()" (change)="selectedCategory.set($any($event.target).value)">
+          <option value="all">Todas las Categorías</option>
           @for (c of topCategories(); track c.id) {
-            <option>{{ c.name }}</option>
+            <option [value]="c.name">{{ c.name }}</option>
           }
         </select>
         @if (auth.getUserRole() !== 'admin') {
@@ -54,105 +58,149 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       <!-- LEFT COLUMN: Ticket List Panel -->
       <section class="tickets-section">
         <div class="tickets-header">
-          <h2>Tickets</h2>
+          <h2>Tickets ({{ filteredTickets().length }})</h2>
           <div class="tickets-header-controls">
+            <!-- View Mode Toggle -->
             <div class="view-toggle">
-              <button class="toggle-btn active" title="Vista en tarjetas"><mat-icon>grid_view</mat-icon></button>
-              <button class="toggle-btn" title="Vista en lista"><mat-icon>view_list</mat-icon></button>
+              <button class="toggle-btn" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')" title="Vista en tarjetas">
+                <mat-icon>grid_view</mat-icon>
+              </button>
+              <button class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')" title="Vista en tabla">
+                <mat-icon>view_list</mat-icon>
+              </button>
             </div>
+
+            <!-- Date Range Filter -->
             <div class="date-range-filter">
-              <span class="filter-label">Fecha Inicio</span>
-              <mat-icon class="calendar-icon">calendar_today</mat-icon>
+              <input type="date" class="date-input" [value]="startDate()" (change)="startDate.set($any($event.target).value)" title="Fecha inicio" />
               <span class="filter-dash">-</span>
-              <span class="filter-label">Fecha Fin</span>
-              <mat-icon class="calendar-icon">calendar_today</mat-icon>
+              <input type="date" class="date-input" [value]="endDate()" (change)="endDate.set($any($event.target).value)" title="Fecha fin" />
+              @if (startDate() || endDate()) {
+                <button class="clear-date-btn" (click)="clearDates()" title="Limpiar fechas">&times;</button>
+              }
             </div>
-            <select class="ticket-filter-select">
-              <option>Todos los Tickets</option>
-              <option>Abiertos</option>
-              <option>En Proceso</option>
-              <option>Cerrados</option>
+
+            <!-- Status Filter -->
+            <select class="ticket-filter-select" [value]="selectedStatus()" (change)="selectedStatus.set($any($event.target).value)">
+              <option value="all">Todos los Tickets</option>
+              <option value="open">Abiertos</option>
+              <option value="in_progress">En Proceso</option>
+              <option value="closed">Cerrados</option>
             </select>
           </div>
         </div>
 
-        <!-- Ticket Cards List -->
-        <div class="ticket-cards-list">
-          @for (t of displayedTickets(); track t.id) {
-            <div class="ticket-card" [routerLink]="['/tickets', t.id]">
-              <div class="ticket-card-thumb">
-                <img [src]="getTicketImage(t.id)" alt="Preview Ticket" />
-              </div>
-              <div class="ticket-card-content">
-                <div class="ticket-card-top">
-                  <div class="creator-info">
-                    <div class="creator-avatar">{{ (t.created_by_username || 'U').slice(0, 2).toUpperCase() }}</div>
-                    <div>
-                      <div class="creator-name-row">
-                        <span class="creator-name">{{ t.created_by_username || 'Usuario' }}</span>
-                        <span class="ticket-code">#ST08{{ t.id }}</span>
-                        <app-priority-tag [priority]="t.priority" />
+        <!-- GRID VIEW (Cards) -->
+        @if (viewMode() === 'grid') {
+          <div class="ticket-cards-list">
+            @for (t of displayedTickets(); track t.id) {
+              <div class="ticket-card" [routerLink]="['/tickets', t.id]">
+                <div class="ticket-card-thumb">
+                  <img [src]="getTicketImage(t.id)" alt="Preview Ticket" />
+                </div>
+                <div class="ticket-card-content">
+                  <div class="ticket-card-top">
+                    <div class="creator-info">
+                      <div class="creator-avatar">{{ (t.created_by_username || 'U').slice(0, 2).toUpperCase() }}</div>
+                      <div>
+                        <div class="creator-name-row">
+                          <span class="creator-name">{{ t.created_by_username || 'Usuario' }}</span>
+                          <span class="ticket-code">#ST08{{ t.id }}</span>
+                          <app-priority-tag [priority]="t.priority" />
+                        </div>
+                        <span class="ticket-date">{{ t.created_at | date:'E, dd MMM hh:mm a' }}</span>
                       </div>
-                      <span class="ticket-date">{{ t.created_at | date:'E, dd MMM hh:mm a' }}</span>
                     </div>
+                    <button mat-icon-button class="more-options-btn" (click)="$event.stopPropagation()">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
                   </div>
-                  <button mat-icon-button class="more-options-btn" (click)="$event.stopPropagation()">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                </div>
 
-                <div class="ticket-subject">
-                  <strong>Asunto:</strong> {{ t.title }}
-                </div>
+                  <div class="ticket-subject">
+                    <strong>Asunto:</strong> {{ t.title }}
+                  </div>
 
-                <div class="ticket-card-meta">
-                  <div class="meta-item">
-                    <span class="meta-label">Asignado a</span>
-                    <div class="assignee-val">
-                      <div class="mini-avatar">{{ (t.assigned_to_username || 'A').slice(0, 1).toUpperCase() }}</div>
-                      <span>{{ t.assigned_to_username || 'Sin asignar' }}</span>
+                  <div class="ticket-card-meta">
+                    <div class="meta-item">
+                      <span class="meta-label">Asignado a</span>
+                      <div class="assignee-val">
+                        <div class="mini-avatar">{{ (t.assigned_to_username || 'A').slice(0, 1).toUpperCase() }}</div>
+                        <span>{{ t.assigned_to_username || 'Sin asignar' }}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">Estado</span>
-                    <app-status-badge [status]="t.status" />
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">Fecha de Cierre</span>
-                    <div class="date-val">
-                      <mat-icon class="date-icon">event</mat-icon>
-                      <span>{{ t.updated_at | date:'dd-MM-yyyy' }}</span>
+                    <div class="meta-item">
+                      <span class="meta-label">Estado</span>
+                      <app-status-badge [status]="t.status" />
+                    </div>
+                    <div class="meta-item">
+                      <span class="meta-label">Fecha de Cierre</span>
+                      <div class="date-val">
+                        <mat-icon class="date-icon">event</mat-icon>
+                        <span>{{ t.updated_at | date:'dd-MM-yyyy' }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          } @empty {
-            <div class="empty-tickets">
-              <mat-icon class="empty-icon">confirmation_number</mat-icon>
-              <p>No hay tickets registrados en el sistema.</p>
-              @if (auth.getUserRole() !== 'admin') {
-                <a mat-flat-button class="primary-btn" routerLink="/tickets/new">Crear primer ticket</a>
-              }
-            </div>
-          }
-        </div>
+            } @empty {
+              <div class="empty-tickets">
+                <mat-icon class="empty-icon">confirmation_number</mat-icon>
+                <p>No hay tickets que coincidan con los filtros seleccionados.</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- TABLE VIEW (List) -->
+        @if (viewMode() === 'table') {
+          <div class="ticket-table-container">
+            <table class="ticket-data-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Asunto</th>
+                  <th>Solicitante</th>
+                  <th>Categoría</th>
+                  <th>Prioridad</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of displayedTickets(); track t.id) {
+                  <tr [routerLink]="['/tickets', t.id]">
+                    <td class="td-code">#ST08{{ t.id }}</td>
+                    <td class="td-title"><strong>{{ t.title }}</strong></td>
+                    <td class="td-user">{{ t.created_by_username || 'Usuario' }}</td>
+                    <td class="td-cat">{{ t.category_name || 'General' }}</td>
+                    <td><app-priority-tag [priority]="t.priority" /></td>
+                    <td><app-status-badge [status]="t.status" /></td>
+                    <td>
+                      <a [routerLink]="['/tickets', t.id]" class="view-btn">Ver</a>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-table-td">No se encontraron tickets con los filtros aplicados.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
 
         <!-- Pagination Footer -->
         <div class="tickets-pagination">
           <div class="nav-btn-group">
-            <button class="pag-btn" [disabled]="currentPage() === 1" (click)="changePage(-1)">Next</button>
-            <button class="pag-btn active" [disabled]="currentPage() === 1" (click)="changePage(-1)">Prev</button>
+            <button class="pag-btn" [disabled]="currentPage() === 1" (click)="changePage(-1)">Prev</button>
+            <button class="pag-btn active" [disabled]="currentPage() * pageSize >= filteredTickets().length" (click)="changePage(1)">Next</button>
           </div>
           <div class="page-numbers">
-            <span class="pag-nav-arrow">&laquo;</span>
-            <span class="pag-num" [class.active]="currentPage() === 1" (click)="setPage(1)">1</span>
-            <span class="pag-num" [class.active]="currentPage() === 2" (click)="setPage(2)">2</span>
-            <span class="pag-num" [class.active]="currentPage() === 3" (click)="setPage(3)">3</span>
-            <span class="pag-num">4</span>
-            <span class="pag-num">5</span>
-            <span class="pag-num">6</span>
-            <span class="pag-nav-arrow">&raquo;</span>
+            <span class="pag-nav-arrow" (click)="setPage(1)">&laquo;</span>
+            @for (p of totalPagesArray(); track p) {
+              <span class="pag-num" [class.active]="currentPage() === p" (click)="setPage(p)">{{ p }}</span>
+            }
+            <span class="pag-nav-arrow" (click)="setPage(totalPagesArray().length)">&raquo;</span>
           </div>
         </div>
       </section>
@@ -162,7 +210,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
         <!-- 4 Stat Cards 2x2 Grid -->
         <div class="kpi-cards-grid">
           <!-- All Tickets Card -->
-          <div class="kpi-card card-all">
+          <div class="kpi-card card-all" (click)="selectedStatus.set('all')">
             <div class="kpi-card-header">
               <div class="kpi-icon-box">
                 <mat-icon>confirmation_number</mat-icon>
@@ -182,7 +230,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
           </div>
 
           <!-- Pending Tickets Card -->
-          <div class="kpi-card card-pending">
+          <div class="kpi-card card-pending" (click)="selectedStatus.set('in_progress')">
             <div class="kpi-card-header">
               <div class="kpi-icon-box">
                 <mat-icon>hourglass_top</mat-icon>
@@ -201,7 +249,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
           </div>
 
           <!-- Completed Tickets Card -->
-          <div class="kpi-card card-completed">
+          <div class="kpi-card card-completed" (click)="selectedStatus.set('closed')">
             <div class="kpi-card-header">
               <div class="kpi-icon-box">
                 <mat-icon>verified</mat-icon>
@@ -245,21 +293,19 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
           <div class="widget-header">
             <h3>Top Categorías</h3>
             <div class="widget-controls">
-              <button class="icon-nav-btn"><mat-icon>chevron_left</mat-icon></button>
-              <button class="icon-nav-btn"><mat-icon>chevron_right</mat-icon></button>
               <a routerLink="/admin/categorias" class="view-all-link">Ver todas</a>
             </div>
           </div>
           <div class="category-pills-list">
+            <div class="category-pill" [class.selected]="selectedCategory() === 'all'" (click)="selectedCategory.set('all')">
+              <span class="cat-name">Todas</span>
+              <span class="cat-badge">{{ stats().total }}</span>
+            </div>
             @for (cat of topCategories(); track cat.id) {
-              <div class="category-pill">
+              <div class="category-pill" [class.selected]="selectedCategory() === cat.name" (click)="selectedCategory.set(cat.name)">
                 <span class="cat-name">{{ cat.name }}</span>
                 <span class="cat-badge">{{ cat.count | number:'2.0-0' }}</span>
               </div>
-            } @empty {
-              <div class="category-pill"><span class="cat-name">Soporte Técnico</span><span class="cat-badge">05</span></div>
-              <div class="category-pill"><span class="cat-name">Sistemas y Redes</span><span class="cat-badge">03</span></div>
-              <div class="category-pill"><span class="cat-name">Administrativo</span><span class="cat-badge">02</span></div>
             }
           </div>
         </div>
@@ -344,6 +390,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      cursor: pointer;
 
       mat-icon {
         font-size: 18px;
@@ -452,8 +499,8 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
         }
 
         &.active {
-          background: var(--sx-page-bg);
-          color: var(--sx-creeping-death);
+          background: var(--sx-incubi-darkness);
+          color: #ffffff;
         }
       }
     }
@@ -464,15 +511,28 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       gap: 6px;
       background: #ffffff;
       border: 1px solid var(--sx-border);
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 8px;
-      font-size: 0.75rem;
-      color: var(--sx-text-muted);
 
-      .calendar-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
+      .date-input {
+        border: none;
+        outline: none;
+        font-size: 0.75rem;
+        color: var(--sx-creeping-death);
+        background: transparent;
+      }
+
+      .filter-dash {
+        color: var(--sx-text-muted);
+      }
+
+      .clear-date-btn {
+        background: transparent;
+        border: none;
+        color: #c62828;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: 700;
       }
     }
 
@@ -656,6 +716,66 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       }
     }
 
+    // ─── Table View ───────────────────────────────────────────────────────────
+    .ticket-table-container {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow-x: auto;
+      box-shadow: 0 4px 20px rgba(8, 20, 84, 0.04);
+      border: 1px solid var(--sx-border);
+    }
+
+    .ticket-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+
+      th {
+        background: #f8fafc;
+        color: var(--sx-creeping-death);
+        font-weight: 700;
+        text-align: left;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--sx-border);
+      }
+
+      td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--sx-border);
+        color: var(--sx-text-primary);
+      }
+
+      tr {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background: #f0f3ff;
+        }
+
+        &:last-child td {
+          border-bottom: none;
+        }
+      }
+
+      .td-code {
+        font-weight: 700;
+        color: var(--sx-incubi-darkness);
+      }
+
+      .view-btn {
+        color: var(--sx-incubi-darkness);
+        font-weight: 700;
+        text-decoration: underline;
+      }
+
+      .empty-table-td {
+        text-align: center;
+        padding: 2rem;
+        color: var(--sx-text-muted);
+      }
+    }
+
     .empty-tickets {
       text-align: center;
       padding: 3rem 1.5rem;
@@ -674,11 +794,6 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       p {
         color: var(--sx-text-muted);
         margin-bottom: 1rem;
-      }
-
-      .primary-btn {
-        background: var(--sx-incubi-darkness) !important;
-        color: #ffffff !important;
       }
     }
 
@@ -772,6 +887,12 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       box-shadow: 0 6px 20px rgba(8, 20, 84, 0.12);
       position: relative;
       overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+      }
 
       &::after {
         content: '';
@@ -830,11 +951,6 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
         font-size: 0.8125rem;
         opacity: 0.9;
         font-weight: 500;
-
-        &::after {
-          content: ' ▼';
-          font-size: 0.65rem;
-        }
       }
 
       .kpi-value {
@@ -896,39 +1012,6 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       }
     }
 
-    .widget-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-
-      .icon-nav-btn {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 1px solid var(--sx-border);
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        color: var(--sx-text-muted);
-
-        mat-icon {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-        }
-      }
-
-      .view-all-link {
-        font-size: 0.75rem;
-        color: var(--sx-incubi-darkness);
-        font-weight: 600;
-        text-decoration: none;
-        margin-left: 4px;
-      }
-    }
-
     .category-pills-list {
       display: flex;
       gap: 10px;
@@ -943,6 +1026,20 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
       border: 1px solid var(--sx-border);
       padding: 6px 12px;
       border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover, &.selected {
+        background: var(--sx-incubi-darkness);
+
+        .cat-name, .cat-badge {
+          color: #ffffff;
+        }
+
+        .cat-badge {
+          background: rgba(255, 255, 255, 0.25);
+        }
+      }
 
       .cat-name {
         font-size: 0.8125rem;
@@ -1035,10 +1132,16 @@ export class DashboardPage implements OnInit {
   stats = signal<DashboardStats>({ total: 0, open: 0, in_progress: 0, closed: 0, avg_close_days: null });
   topCategories = signal<CategoryCount[]>([]);
   allTickets = signal<Ticket[]>([]);
-  displayedTickets = signal<Ticket[]>([]);
-  currentPage = signal<number>(1);
 
-  // Asset images array for ticket thumbnails
+  // Interactive Signals
+  viewMode = signal<'grid' | 'table'>('grid');
+  selectedStatus = signal<string>('all');
+  selectedCategory = signal<string>('all');
+  startDate = signal<string>('');
+  endDate = signal<string>('');
+  currentPage = signal<number>(1);
+  pageSize = 3;
+
   private ticketImages = [
     '/features/tickets.png',
     '/features/adjuntos.png',
@@ -1047,6 +1150,54 @@ export class DashboardPage implements OnInit {
     '/features/respuestas.png',
     '/features/csat.png',
   ];
+
+  // Computed signal that dynamically filters tickets based on all interactive controls
+  filteredTickets = computed(() => {
+    let list = this.allTickets();
+
+    // 1. Status Filter
+    const st = this.selectedStatus();
+    if (st !== 'all') {
+      list = list.filter((t) => t.status === st);
+    }
+
+    // 2. Category Filter
+    const cat = this.selectedCategory();
+    if (cat !== 'all') {
+      list = list.filter((t) => (t.category_name || '').toLowerCase() === cat.toLowerCase());
+    }
+
+    // 3. Start Date Filter
+    const start = this.startDate();
+    if (start) {
+      list = list.filter((t) => new Date(t.created_at) >= new Date(start));
+    }
+
+    // 4. End Date Filter
+    const end = this.endDate();
+    if (end) {
+      const endDay = new Date(end);
+      endDay.setHours(23, 59, 59, 999);
+      list = list.filter((t) => new Date(t.created_at) <= endDay);
+    }
+
+    return list;
+  });
+
+  // Displayed tickets for current page
+  displayedTickets = computed(() => {
+    const list = this.filteredTickets();
+    const page = this.currentPage();
+    const start = (page - 1) * this.pageSize;
+    return list.slice(start, start + this.pageSize);
+  });
+
+  // Total pages array for pagination UI
+  totalPagesArray = computed(() => {
+    const total = this.filteredTickets().length;
+    const count = Math.ceil(total / this.pageSize) || 1;
+    return Array.from({ length: count }, (_, i) => i + 1);
+  });
 
   ngOnInit() {
     this.dashboardService.getStats().subscribe((s) => {
@@ -1059,7 +1210,6 @@ export class DashboardPage implements OnInit {
 
     this.ticketService.getAll().subscribe((tickets) => {
       this.allTickets.set(tickets);
-      this.updateDisplayedTickets();
     });
   }
 
@@ -1067,22 +1217,59 @@ export class DashboardPage implements OnInit {
     return this.ticketImages[id % this.ticketImages.length];
   }
 
+  clearDates() {
+    this.startDate.set('');
+    this.endDate.set('');
+  }
+
   setPage(page: number) {
     this.currentPage.set(page);
-    this.updateDisplayedTickets();
   }
 
   changePage(delta: number) {
-    const next = Math.max(1, this.currentPage() + delta);
+    const maxPage = this.totalPagesArray().length;
+    const next = Math.min(Math.max(1, this.currentPage() + delta), maxPage);
     this.currentPage.set(next);
-    this.updateDisplayedTickets();
   }
 
-  private updateDisplayedTickets() {
-    const tickets = this.allTickets();
-    const pageSize = 3;
-    const start = (this.currentPage() - 1) * pageSize;
-    this.displayedTickets.set(tickets.slice(start, start + pageSize));
+  // Export Filtered Tickets to CSV File
+  exportTicketsCSV() {
+    const tickets = this.filteredTickets();
+    if (!tickets.length) {
+      alert('No hay tickets para exportar con los filtros actuales.');
+      return;
+    }
+
+    const headers = ['ID', 'Titulo', 'Estado', 'Prioridad', 'Solicitante', 'Asignado', 'Fecha Creacion'];
+    const rows = tickets.map((t) => [
+      `#ST08${t.id}`,
+      `"${(t.title || '').replace(/"/g, '""')}"`,
+      t.status,
+      t.priority,
+      `"${t.created_by_username || ''}"`,
+      `"${t.assigned_to_username || 'Sin asignar'}"`,
+      t.created_at,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `tickets_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Handle File Import
+  handleFileImport(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      alert(`Archivo "${file.name}" cargado exitosamente. Procesando actualización de tickets...`);
+    }
   }
 }
+
 

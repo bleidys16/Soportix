@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { TitleCasePipe } from '@angular/common';
+import { TitleCasePipe, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -18,6 +18,15 @@ interface NavItem {
   roles: string[];
 }
 
+export interface NotificationItem {
+  id: number;
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  type: 'ticket' | 'system' | 'user';
+}
+
 const MOBILE_BREAKPOINT = '(max-width: 960px)';
 
 @Component({
@@ -28,6 +37,7 @@ const MOBILE_BREAKPOINT = '(max-width: 960px)';
     RouterLink,
     RouterLinkActive,
     TitleCasePipe,
+    DatePipe,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
@@ -46,6 +56,36 @@ export class Layout {
   );
 
   protected readonly mobileMenuOpen = signal(false);
+
+  // Lista interactiva de Notificaciones
+  notifications = signal<NotificationItem[]>([
+    {
+      id: 1,
+      title: 'Nuevo Ticket Asignado',
+      message: 'Se te ha asignado el ticket #ST081 - Conexión de Red',
+      time: 'Hace 10 min',
+      read: false,
+      type: 'ticket',
+    },
+    {
+      id: 2,
+      title: 'Respuesta Recibida',
+      message: 'El cliente adjuntó captura de pantalla al ticket #ST082',
+      time: 'Hace 1 hora',
+      read: false,
+      type: 'user',
+    },
+    {
+      id: 3,
+      title: 'Mantenimiento del Sistema',
+      message: 'Servicio optimizado correctamente en PostgreSQL Neon',
+      time: 'Hace 3 horas',
+      read: true,
+      type: 'system',
+    },
+  ]);
+
+  unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
 
   protected readonly operationItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard', roles: ['admin', 'agent', 'user'] },
@@ -78,6 +118,16 @@ export class Layout {
 
   constructor(private auth: AuthService) {}
 
+  markAllNotificationsAsRead(): void {
+    this.notifications.update((list) => list.map((n) => ({ ...n, read: true })));
+  }
+
+  markNotificationAsRead(id: number): void {
+    this.notifications.update((list) =>
+      list.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  }
+
   toggleMobileMenu(): void {
     this.mobileMenuOpen.set(!this.mobileMenuOpen());
   }
@@ -90,3 +140,4 @@ export class Layout {
     this.auth.logout();
   }
 }
+
