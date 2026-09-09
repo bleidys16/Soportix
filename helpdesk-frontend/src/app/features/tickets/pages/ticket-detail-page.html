@@ -122,25 +122,48 @@
         }
 
         <div class="sx-card comments-card">
-          <h2>Conversación ({{ comments().length }})</h2>
+          <div class="chat-header">
+            <h2>Conversación <span class="chat-count">{{ comments().length }}</span></h2>
+          </div>
 
-          @for (c of comments(); track c.id) {
-            <div class="comment">
-              <div class="comment-avatar">{{ (c.author_username || '?').slice(0, 2).toUpperCase() }}</div>
-              <div class="comment-body-wrap">
-                <div class="comment-header">
-                  <strong>{{ c.author_username }}</strong>
-                  @if (c.author_role) {
-                    <span class="role-chip">{{ roleLabel[c.author_role] || c.author_role }}</span>
+          <div class="chat-messages">
+            @for (c of comments(); track c.id) {
+              <div class="chat-row" [class.is-mine]="c.author_username === auth.getUsername()">
+                @if (c.author_username !== auth.getUsername()) {
+                  <div class="bubble-avatar" [class.avatar-agent]="c.author_role !== 'user'">
+                    {{ (c.author_username || '?').slice(0, 2).toUpperCase() }}
+                  </div>
+                }
+                <div class="bubble-wrap">
+                  @if (c.author_username !== auth.getUsername()) {
+                    <div class="bubble-meta-top">
+                      <strong>{{ c.author_username }}</strong>
+                      @if (c.author_role) {
+                        <span class="role-chip">{{ roleLabel[c.author_role] || c.author_role }}</span>
+                      }
+                    </div>
                   }
-                  <span class="comment-date">{{ c.created_at | date:'short' }}</span>
+                  <div
+                    class="bubble"
+                    [class.bubble-mine]="c.author_username === auth.getUsername()"
+                    [class.bubble-other]="c.author_username !== auth.getUsername()"
+                    [class.agent-bubble]="c.author_username !== auth.getUsername() && c.author_role !== 'user'"
+                  >{{ c.body }}</div>
+                  <span class="bubble-date">{{ c.created_at | date:'dd MMM, HH:mm' }}</span>
                 </div>
-                <div class="comment-body">{{ c.body }}</div>
+                @if (c.author_username === auth.getUsername()) {
+                  <div class="bubble-avatar avatar-mine">
+                    {{ (c.author_username || '?').slice(0, 2).toUpperCase() }}
+                  </div>
+                }
               </div>
-            </div>
-          } @empty {
-            <p class="empty-hint">Sin comentarios aún.</p>
-          }
+            } @empty {
+              <div class="empty-chat">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <p>Sin comentarios aún. Sé el primero en escribir.</p>
+              </div>
+            }
+          </div>
 
           @if (cannedResponses().length) {
             <mat-form-field appearance="outline" class="full-width canned-select" subscriptSizing="dynamic">
@@ -153,12 +176,28 @@
             </mat-form-field>
           }
 
-          <div class="new-comment">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Agregar comentario</mat-label>
-              <textarea matInput [(ngModel)]="newCommentBody" rows="2" placeholder="Escriba un comentario..."></textarea>
-            </mat-form-field>
-            <button mat-flat-button class="send-btn" (click)="addComment()" [disabled]="!newCommentBody.trim()">Enviar</button>
+          <div class="chat-input-area">
+            <div class="chat-input-avatar">
+              {{ (auth.getUsername() || '?').slice(0, 2).toUpperCase() }}
+            </div>
+            <div class="chat-input-field">
+              <textarea
+                class="chat-textarea"
+                [(ngModel)]="newCommentBody"
+                rows="1"
+                placeholder="Escribe un mensaje..."
+                (keydown)="onChatKeydown($event)"
+              ></textarea>
+              <button
+                class="send-fab"
+                type="button"
+                (click)="addComment()"
+                [disabled]="!newCommentBody.trim()"
+                aria-label="Enviar"
+              >
+                <mat-icon>send</mat-icon>
+              </button>
+            </div>
           </div>
         </div>
       </div>

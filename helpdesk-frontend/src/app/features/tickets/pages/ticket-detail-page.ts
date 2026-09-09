@@ -48,22 +48,51 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     .resolution-card h3 { display: flex; align-items: center; gap: 0.375rem; margin: 0 0 0.5rem; color: var(--sx-status-open-fg); font-size: 1rem; }
     .resolution-card p { margin: 0; white-space: pre-wrap; color: var(--sx-text-primary); }
 
-    .comments-card h2 { margin: 0 0 1rem; font-size: 1rem; font-weight: 500; color: var(--sx-text-primary); }
-    .comment { display: flex; gap: 10px; padding: 0.75rem 0; border-top: 1px solid var(--sx-border); }
-    .comment:first-of-type { border-top: none; padding-top: 0; }
-    .comment-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--sx-primary); color: #fff; font-size: 0.6875rem; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .comment-body-wrap { flex: 1; min-width: 0; }
-    .comment-header { display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; margin-bottom: 4px; flex-wrap: wrap; }
-    .comment-header strong { color: var(--sx-text-primary); }
-    .role-chip { font-size: 0.6875rem; color: var(--sx-text-secondary); background: var(--sx-page-bg); padding: 1px 8px; border-radius: 10px; }
-    .comment-date { color: var(--sx-text-muted); margin-left: auto; }
-    .comment-body { white-space: pre-wrap; color: var(--sx-text-primary); font-size: 0.875rem; }
-    .empty-hint { color: var(--sx-text-muted); font-size: 0.875rem; }
+    /* Chat / Comments Card */
+    .comments-card { padding: 0 !important; overflow: hidden; }
+    .chat-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--sx-border); }
+    .chat-header h2 { margin: 0; font-size: 0.9375rem; font-weight: 500; color: var(--sx-text-primary); display: flex; align-items: center; gap: 8px; }
+    .chat-count { background: var(--sx-page-bg); color: var(--sx-text-secondary); font-size: 0.75rem; font-weight: 400; padding: 2px 8px; border-radius: 10px; }
 
-    .canned-select { margin-top: 1rem; }
-    .new-comment { display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 1rem; }
-    .new-comment mat-form-field { flex: 1; }
-    .send-btn { background: var(--sx-primary) !important; color: #fff !important; border-radius: var(--sx-radius-control); }
+    .chat-messages { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 14px; max-height: 420px; overflow-y: auto; scroll-behavior: smooth; }
+
+    .chat-row { display: flex; align-items: flex-end; gap: 8px; }
+    .chat-row.is-mine { flex-direction: row-reverse; }
+
+    .bubble-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6875rem; font-weight: 600; color: #fff; flex-shrink: 0; background: var(--sx-grand-rapids); }
+    .bubble-avatar.avatar-agent { background: var(--sx-incubi-darkness); }
+    .bubble-avatar.avatar-mine { background: var(--sx-reef-waters); }
+
+    .bubble-wrap { max-width: 72%; display: flex; flex-direction: column; gap: 3px; }
+    .chat-row.is-mine .bubble-wrap { align-items: flex-end; }
+
+    .bubble-meta-top { display: flex; align-items: center; gap: 6px; padding: 0 4px; }
+    .bubble-meta-top strong { font-size: 0.8125rem; font-weight: 500; color: var(--sx-text-primary); }
+    .role-chip { font-size: 0.6875rem; color: var(--sx-text-secondary); background: var(--sx-page-bg); border: 1px solid var(--sx-border); padding: 1px 8px; border-radius: 10px; }
+
+    .bubble { padding: 10px 14px; border-radius: 18px; font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .bubble-mine { background: var(--sx-grand-rapids); color: #fff; border-bottom-right-radius: 4px; }
+    .bubble-other { background: var(--sx-page-bg); color: var(--sx-text-primary); border: 1px solid var(--sx-border); border-bottom-left-radius: 4px; }
+    .bubble-other.agent-bubble { background: #f0edfb; border-color: #d4cef0; }
+
+    .bubble-date { font-size: 0.6875rem; color: var(--sx-text-muted); padding: 0 4px; }
+
+    .empty-chat { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 2rem; color: var(--sx-text-muted); text-align: center; }
+    .empty-chat mat-icon { font-size: 36px; width: 36px; height: 36px; }
+    .empty-chat p { margin: 0; font-size: 0.875rem; }
+
+    .canned-select { padding: 0 1.25rem 0.75rem; }
+
+    .chat-input-area { padding: 0.75rem 1.25rem; border-top: 1px solid var(--sx-border); display: flex; align-items: flex-end; gap: 10px; background: var(--sx-card-bg); }
+    .chat-input-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--sx-reef-waters); color: #fff; font-size: 0.6875rem; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: 2px; }
+    .chat-input-field { flex: 1; display: flex; align-items: flex-end; gap: 8px; background: var(--sx-page-bg); border: 1px solid var(--sx-border); border-radius: 22px; padding: 8px 8px 8px 16px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+    .chat-input-field:focus-within { border-color: var(--sx-grand-rapids); box-shadow: 0 0 0 3px rgba(77,47,178,0.1); }
+    .chat-textarea { flex: 1; border: none; outline: none; background: transparent; resize: none; font-size: 0.875rem; color: var(--sx-text-primary); font-family: inherit; max-height: 120px; overflow-y: auto; line-height: 1.5; }
+    .chat-textarea::placeholder { color: var(--sx-text-muted); }
+    .send-fab { background: var(--sx-grand-rapids); color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; min-width: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s ease, transform 0.15s ease; }
+    .send-fab mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    .send-fab:hover:not(:disabled) { background: var(--sx-incubi-darkness); transform: scale(1.05); }
+    .send-fab:disabled { background: var(--sx-border); color: var(--sx-text-muted); cursor: not-allowed; }
 
     .details-card h3 { margin: 0 0 1rem; font-size: 0.9375rem; font-weight: 500; color: var(--sx-text-primary); }
     .details-card .full-width { width: 100%; margin-bottom: 0.75rem; }
@@ -274,6 +303,14 @@ export class TicketDetailPage implements OnInit {
       this.comments.update((cs) => [...cs, c]);
       this.newCommentBody = '';
     });
+  }
+
+  onChatKeydown(event: Event) {
+    const ke = event as KeyboardEvent;
+    if (ke.key === 'Enter' && !ke.shiftKey) {
+      ke.preventDefault();
+      this.addComment();
+    }
   }
 
   protected readonly statusLabel: Record<TicketStatus, string> = {
