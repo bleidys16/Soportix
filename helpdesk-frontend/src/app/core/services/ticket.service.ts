@@ -3,11 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Ticket } from '../models/ticket';
+import { Paginated } from '../models/paginated';
 
 export interface TicketFilters {
   status?: string;
   priority?: string;
   search?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -16,14 +19,16 @@ export class TicketService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(filters?: TicketFilters): Observable<Ticket[]> {
+  getAll(filters?: TicketFilters): Observable<Paginated<Ticket>> {
     let params = new HttpParams();
     if (filters) {
       if (filters.status) params = params.set('status', filters.status);
       if (filters.priority) params = params.set('priority', filters.priority);
       if (filters.search) params = params.set('search', filters.search);
+      if (filters.page) params = params.set('page', filters.page);
+      if (filters.pageSize) params = params.set('page_size', filters.pageSize);
     }
-    return this.http.get<Ticket[]>(`${this.apiUrl}/`, { params });
+    return this.http.get<Paginated<Ticket>>(`${this.apiUrl}/`, { params });
   }
 
   getById(id: number): Observable<Ticket> {

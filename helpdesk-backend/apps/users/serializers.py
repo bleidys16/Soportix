@@ -58,6 +58,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'role', 'is_active', 'ticket_count']
 
     def get_ticket_count(self, obj):
+        if hasattr(obj, 'ticket_count'):
+            return obj.ticket_count
         return obj.tickets_created.count()
 
 

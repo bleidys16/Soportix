@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -126,6 +126,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     .attachment-item a { color: var(--sx-primary); text-decoration: none; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .attachment-item a:hover { text-decoration: underline; }
     .attachment-item mat-icon { font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
+    .attachment-thumb { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
     .attachment-item .delete-attachment-btn { width: 28px; height: 28px; line-height: 28px; flex-shrink: 0; }
     .attachment-item .delete-attachment-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .attach-btn { border-radius: var(--sx-radius-control); }
@@ -142,11 +143,20 @@ export class TicketDetailPage implements OnInit {
   private attachmentService = inject(AttachmentService);
 
   protected auth = inject(AuthService);
+  // Se memorizan: el rol/usuario no cambian durante la vida de esta página,
+  // así se evita releer localStorage en cada ciclo de detección de cambios.
+  protected userRole = computed(() => this.auth.getUserRole());
+  protected userId = computed(() => this.auth.getUserId());
+  protected username = computed(() => this.auth.getUsername());
+
   ticket = signal<Ticket | null>(null);
   comments = signal<Comment[]>([]);
   loading = signal(true);
   newCommentBody = '';
   statuses: TicketStatus[] = ['open', 'in_progress', 'closed'];
+  visibleStatuses = computed<TicketStatus[]>(() =>
+    this.userRole() === 'agent' ? this.statuses : this.statuses.filter((s) => s !== 'closed')
+  );
   cannedResponses = signal<CannedResponse[]>([]);
 
   attachments = signal<Attachment[]>([]);
@@ -172,7 +182,7 @@ export class TicketDetailPage implements OnInit {
     });
     this.commentService.getAll(id).subscribe((cs) => this.comments.set(cs));
 
-    if (this.auth.getUserRole() === 'agent' || this.auth.getUserRole() === 'admin') {
+    if (this.userRole() === 'agent' || this.userRole() === 'admin') {
       this.cannedResponseService.getAll().subscribe((rs) => this.cannedResponses.set(rs));
     }
   }
@@ -205,6 +215,18 @@ export class TicketDetailPage implements OnInit {
     });
   }
 
+  private readonly imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+  brokenThumbs = signal<Set<number>>(new Set());
+
+  isImage(fileName: string): boolean {
+    const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+    return this.imageExtensions.includes(ext);
+  }
+
+  markThumbBroken(attachmentId: number) {
+    this.brokenThumbs.update((s) => new Set(s).add(attachmentId));
+  }
+
   deleteAttachment(a: Attachment) {
     const t = this.ticket();
     if (!t) return;
@@ -231,10 +253,6 @@ export class TicketDetailPage implements OnInit {
           this.csatSubmitting.set(false);
         },
       });
-  }
-
-  statusesFor(role: string | null): TicketStatus[] {
-    return role === 'agent' ? this.statuses : this.statuses.filter((s) => s !== 'closed');
   }
 
   changeStatus(status: TicketStatus) {
@@ -280,7 +298,7 @@ export class TicketDetailPage implements OnInit {
 
   assignToMe() {
     const t = this.ticket();
-    const userId = this.auth.getUserId();
+    const userId = this.userId();
     if (!t || !userId) return;
     this.ticketService.update(t.id, { assigned_to: userId }).subscribe((updated) => {
       this.ticket.set(updated);

@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { TicketService, TicketFilters } from '../../../core/services/ticket.service';
 import { Ticket, TicketStatus } from '../../../core/models/ticket';
 
@@ -19,7 +20,7 @@ import { Ticket, TicketStatus } from '../../../core/models/ticket';
   imports: [
     DatePipe, TitleCasePipe, FormsModule, RouterLink,
     MatTableModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule,
+    MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule, MatPaginatorModule,
   ],
   template: `
     <h1>Panel de Agente - Tickets</h1>
@@ -106,6 +107,14 @@ import { Ticket, TicketStatus } from '../../../core/models/ticket';
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
+
+      <mat-paginator
+        [length]="totalCount()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 25, 50, 100]"
+        (page)="onPageChange($event)"
+      />
     }
   `,
   styles: [`
@@ -116,6 +125,9 @@ export class AgentTicketListPage implements OnInit {
   private ticketService = inject(TicketService);
 
   tickets = signal<Ticket[]>([]);
+  totalCount = signal(0);
+  pageIndex = signal(0);
+  pageSize = 25;
   loading = signal(true);
   search = '';
   filterStatus = '';
@@ -131,18 +143,28 @@ export class AgentTicketListPage implements OnInit {
 
   loadTickets() {
     this.loading.set(true);
-    const filters: TicketFilters = {};
+    const filters: TicketFilters = { page: this.pageIndex() + 1, pageSize: this.pageSize };
     if (this.filterStatus) filters.status = this.filterStatus;
     if (this.filterPriority) filters.priority = this.filterPriority;
     if (this.search) filters.search = this.search;
 
-    this.ticketService.getAll(filters).subscribe((data) => {
-      this.tickets.set(data);
+    this.ticketService.getAll(filters).subscribe((page) => {
+      this.tickets.set(page.results);
+      this.totalCount.set(page.count);
       this.loading.set(false);
     });
   }
 
-  applyFilter() { this.loadTickets(); }
+  applyFilter() {
+    this.pageIndex.set(0);
+    this.loadTickets();
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize = event.pageSize;
+    this.loadTickets();
+  }
 
   changeStatus(ticket: Ticket, status: TicketStatus) {
     this.ticketService.update(ticket.id, { status }).subscribe(() => this.loadTickets());

@@ -21,6 +21,7 @@ export interface CategoryCount {
 export interface AgentCount {
   agent: string;
   count: number;
+  resolved: number;
 }
 
 export interface TicketsTrendPoint {

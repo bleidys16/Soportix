@@ -32,7 +32,16 @@
                 @for (a of attachments(); track a.id) {
                   <li class="attachment-item">
                     <a [href]="a.file" target="_blank" rel="noopener">
-                      <mat-icon>attach_file</mat-icon>
+                      @if (isImage(a.file_name) && !brokenThumbs().has(a.id)) {
+                        <img
+                          class="attachment-thumb"
+                          [src]="a.file"
+                          [alt]="a.file_name"
+                          (error)="markThumbBroken(a.id)"
+                        />
+                      } @else {
+                        <mat-icon>attach_file</mat-icon>
+                      }
                       {{ a.file_name }}
                     </a>
                     <button
@@ -83,7 +92,7 @@
               @if (t.csat_comment) {
                 <p class="description" style="margin-top: 0.5rem; font-size: 0.875rem;">{{ t.csat_comment }}</p>
               }
-            } @else if (auth.getUserRole() === 'user') {
+            } @else if (userRole() === 'user') {
               <h3>¿Cómo calificarías la atención recibida?</h3>
               <p class="csat-hint">Tu opinión nos ayuda a mejorar el soporte.</p>
               <div class="csat-stars">
@@ -128,14 +137,14 @@
 
           <div class="chat-messages">
             @for (c of comments(); track c.id) {
-              <div class="chat-row" [class.is-mine]="c.author_username === auth.getUsername()">
-                @if (c.author_username !== auth.getUsername()) {
+              <div class="chat-row" [class.is-mine]="c.author_username === username()">
+                @if (c.author_username !== username()) {
                   <div class="bubble-avatar" [class.avatar-agent]="c.author_role !== 'user'">
                     {{ (c.author_username || '?').slice(0, 2).toUpperCase() }}
                   </div>
                 }
                 <div class="bubble-wrap">
-                  @if (c.author_username !== auth.getUsername()) {
+                  @if (c.author_username !== username()) {
                     <div class="bubble-meta-top">
                       <strong>{{ c.author_username }}</strong>
                       @if (c.author_role) {
@@ -145,13 +154,13 @@
                   }
                   <div
                     class="bubble"
-                    [class.bubble-mine]="c.author_username === auth.getUsername()"
-                    [class.bubble-other]="c.author_username !== auth.getUsername()"
-                    [class.agent-bubble]="c.author_username !== auth.getUsername() && c.author_role !== 'user'"
+                    [class.bubble-mine]="c.author_username === username()"
+                    [class.bubble-other]="c.author_username !== username()"
+                    [class.agent-bubble]="c.author_username !== username() && c.author_role !== 'user'"
                   >{{ c.body }}</div>
                   <span class="bubble-date">{{ c.created_at | date:'dd MMM, HH:mm' }}</span>
                 </div>
-                @if (c.author_username === auth.getUsername()) {
+                @if (c.author_username === username()) {
                   <div class="bubble-avatar avatar-mine">
                     {{ (c.author_username || '?').slice(0, 2).toUpperCase() }}
                   </div>
@@ -178,7 +187,7 @@
 
           <div class="chat-input-area">
             <div class="chat-input-avatar">
-              {{ (auth.getUsername() || '?').slice(0, 2).toUpperCase() }}
+              {{ (username() || '?').slice(0, 2).toUpperCase() }}
             </div>
             <div class="chat-input-field">
               <textarea
@@ -206,17 +215,17 @@
         <div class="sx-card details-card">
           <h3>Detalles</h3>
 
-          @if (auth.getUserRole() === 'agent' || auth.getUserRole() === 'admin') {
+          @if (userRole() === 'agent' || userRole() === 'admin') {
             <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
               <mat-label>Estado</mat-label>
               <mat-select [value]="t.status" (selectionChange)="changeStatus($event.value)">
-                @for (s of statusesFor(auth.getUserRole()); track s) {
+                @for (s of visibleStatuses(); track s) {
                   <mat-option [value]="s">{{ statusLabel[s] }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
 
-            @if (t.assigned_to !== auth.getUserId()) {
+            @if (t.assigned_to !== userId()) {
               <button mat-stroked-button class="assign-btn" type="button" (click)="assignToMe()">
                 <mat-icon>assignment_ind</mat-icon> Asignarme
               </button>

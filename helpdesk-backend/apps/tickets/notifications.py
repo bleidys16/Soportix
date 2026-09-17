@@ -7,8 +7,13 @@ STATUS_LABELS = dict(
 )
 
 
-def _create(recipient, ticket, notif_type, message):
-    Notification.objects.create(recipient=recipient, ticket=ticket, notif_type=notif_type, message=message)
+def _create_many(recipients, ticket, notif_type, message):
+    if not recipients:
+        return
+    Notification.objects.bulk_create([
+        Notification(recipient=recipient, ticket=ticket, notif_type=notif_type, message=message)
+        for recipient in recipients
+    ])
 
 
 def notify_new_comment(ticket, author):
@@ -19,8 +24,7 @@ def notify_new_comment(ticket, author):
         recipients.add(ticket.assigned_to)
 
     message = f'{author.first_name or author.username} comentó en el ticket "{ticket.title}".'
-    for recipient in recipients:
-        _create(recipient, ticket, 'comment', message)
+    _create_many(recipients, ticket, 'comment', message)
 
 
 def notify_status_change(ticket, actor, old_status, new_status):
@@ -33,8 +37,7 @@ def notify_status_change(ticket, actor, old_status, new_status):
         recipients.add(ticket.created_by)
     if ticket.assigned_to_id and ticket.assigned_to_id != actor.id:
         recipients.add(ticket.assigned_to)
-    for recipient in recipients:
-        _create(recipient, ticket, 'status_change', message)
+    _create_many(recipients, ticket, 'status_change', message)
 
 
 def notify_assignment(ticket, actor, old_assigned_id, new_assigned_id):
@@ -43,4 +46,4 @@ def notify_assignment(ticket, actor, old_assigned_id, new_assigned_id):
     if new_assigned_id == actor.id:
         return
     message = f'Se te asignó el ticket "{ticket.title}".'
-    _create(ticket.assigned_to, ticket, 'assignment', message)
+    _create_many({ticket.assigned_to}, ticket, 'assignment', message)

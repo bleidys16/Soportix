@@ -1,13 +1,15 @@
-from django.db.models import ProtectedError
+from django.db.models import Count, ProtectedError
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.filters import SearchFilter
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
+from config.pagination import StandardResultsSetPagination
 from .models import Category, Ticket, Comment, CannedResponse, Attachment, Notification
 from .serializers import (
     CategorySerializer, TicketSerializer, CommentSerializer,
@@ -17,7 +19,7 @@ from .permissions import IsAdminUser, IsAgentUser, IsOwnerOrStaff, DenyDemoWrite
 from .notifications import notify_new_comment, notify_status_change, notify_assignment
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.annotate(ticket_count=Count('tickets'))
     serializer_class = CategorySerializer
 
     def get_permissions(self):
@@ -39,8 +41,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class TicketViewSet(viewsets.ModelViewSet):
     serializer_class = TicketSerializer
-    filter_backends = [DjangoFilterBackend]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['status', 'priority', 'category', 'assigned_to']
+    search_fields = ['title', 'description']
 
     def get_permissions(self):
         if self.action == 'destroy':
@@ -90,7 +94,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, DenyDemoWrites]
 
     def get_queryset(self):
-        qs = Comment.objects.filter(ticket_id=self.kwargs['ticket_pk'])
+        qs = Comment.objects.filter(ticket_id=self.kwargs['ticket_pk']).select_related('author__profile')
         user = self.request.user
         if user.profile.role == 'user':
             qs = qs.filter(ticket__created_by=user)
@@ -121,7 +125,7 @@ class AttachmentViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'head', 'options']
 
     def get_queryset(self):
-        return Attachment.objects.filter(ticket_id=self.kwargs['ticket_pk'])
+        return Attachment.objects.filter(ticket_id=self.kwargs['ticket_pk']).select_related('uploaded_by')
 
     def get_object(self):
         # Los permisos de objeto se validan contra el ticket dueño del adjunto,

@@ -9,6 +9,8 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'color', 'ticket_count']
 
     def get_ticket_count(self, obj):
+        if hasattr(obj, 'ticket_count'):
+            return obj.ticket_count
         return obj.tickets.count()
 
 class CommentSerializer(serializers.ModelSerializer):

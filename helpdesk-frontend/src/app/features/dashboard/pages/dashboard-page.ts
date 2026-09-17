@@ -1255,8 +1255,11 @@ export class DashboardPage implements OnInit {
       this.topCategories.set(cats);
     });
 
-    this.ticketService.getAll().subscribe((tickets) => {
-      this.allTickets.set(tickets);
+    // pageSize acotado (tope del backend: 500): este widget filtra/pagina en el
+    // cliente sobre todo lo cargado, así que se trae "todo" pero con un límite
+    // real en vez de una consulta verdaderamente ilimitada.
+    this.ticketService.getAll({ pageSize: 500 }).subscribe((page) => {
+      this.allTickets.set(page.results);
     });
   }
 

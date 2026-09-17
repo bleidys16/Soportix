@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { TicketService, TicketFilters } from '../../../core/services/ticket.service';
 import { Ticket, TicketStatus, TicketPriority } from '../../../core/models/ticket';
 import { AuthService } from '../../../core/auth/auth';
@@ -25,7 +27,7 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
     DatePipe, TitleCasePipe, FormsModule, RouterLink,
     MatTableModule, MatFormFieldModule, MatInputModule, MatSelectModule,
     MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule, MatTooltipModule,
-    StatusBadgeComponent, PriorityTagComponent,
+    MatPaginatorModule, StatusBadgeComponent, PriorityTagComponent,
   ],
   templateUrl: './ticket-list-page.html',
   styles: [`
@@ -57,9 +59,13 @@ export class TicketListPage implements OnInit {
   private ticketService = inject(TicketService);
   private breakpointObserver = inject(BreakpointObserver);
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   protected auth = inject(AuthService);
 
   tickets = signal<Ticket[]>([]);
+  totalCount = signal(0);
+  pageIndex = signal(0);
+  pageSize = 25;
   loading = signal(true);
 
   filters: TicketFilters = { status: '', priority: '', search: '' };
@@ -76,9 +82,11 @@ export class TicketListPage implements OnInit {
       this.filters.search = searchParam;
     }
     this.loadTickets();
-    this.breakpointObserver.observe('(max-width: 768px)').subscribe(({ matches }) => {
-      this.displayedColumns.set(matches ? this.compactColumns : this.allColumns);
-    });
+    this.breakpointObserver.observe('(max-width: 768px)')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ matches }) => {
+        this.displayedColumns.set(matches ? this.compactColumns : this.allColumns);
+      });
   }
 
   pageTitle(): string {
@@ -90,18 +98,26 @@ export class TicketListPage implements OnInit {
 
   loadTickets() {
     this.loading.set(true);
-    const params: TicketFilters = {};
+    const params: TicketFilters = { page: this.pageIndex() + 1, pageSize: this.pageSize };
     if (this.filters.status) params.status = this.filters.status;
     if (this.filters.priority) params.priority = this.filters.priority;
     if (this.filters.search) params.search = this.filters.search;
 
-    this.ticketService.getAll(params).subscribe((data) => {
-      this.tickets.set(data);
+    this.ticketService.getAll(params).subscribe((page) => {
+      this.tickets.set(page.results);
+      this.totalCount.set(page.count);
       this.loading.set(false);
     });
   }
 
   applyFilter() {
+    this.pageIndex.set(0);
+    this.loadTickets();
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize = event.pageSize;
     this.loadTickets();
   }
 }

@@ -155,7 +155,10 @@ if CLOUDINARY_URL:
         'API_KEY': _cld.username,
         'API_SECRET': _cld.password,
     }
-    STORAGES['default'] = {'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'}
+    # RawMediaCloudinaryStorage (no MediaCloudinaryStorage) porque los adjuntos de
+    # tickets pueden ser cualquier tipo de archivo, no solo imágenes; el resource_type
+    # 'image' de Cloudinary rechaza archivos no-imagen y le recorta la extensión al nombre.
+    STORAGES['default'] = {'BACKEND': 'cloudinary_storage.storage.RawMediaCloudinaryStorage'}
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

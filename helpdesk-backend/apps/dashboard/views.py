@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Q
+from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F, Q
 from django.db.models.functions import TruncDate
 from apps.tickets.models import Ticket, Category
 from django.contrib.auth.models import User
@@ -18,26 +18,27 @@ class DashboardStatsView(APIView):
         else:
             tickets = Ticket.objects.all()
 
-        total = tickets.count()
-        open_count = tickets.filter(status='open').count()
-        in_progress = tickets.filter(status='in_progress').count()
-        closed = tickets.filter(status='closed').count()
+        stats = tickets.aggregate(
+            total=Count('id'),
+            open=Count('id', filter=Q(status='open')),
+            in_progress=Count('id', filter=Q(status='in_progress')),
+            closed=Count('id', filter=Q(status='closed')),
+            avg_close_seconds=Avg(
+                ExpressionWrapper(F('updated_at') - F('created_at'), output_field=DurationField()),
+                filter=Q(status='closed'),
+            ),
+        )
 
-        # Tiempo promedio de cierre (dias) para tickets cerrados
-        avg_close = None
-        closed_tickets = tickets.filter(status='closed')
-        if closed_tickets.exists():
-            total_days = 0
-            for t in closed_tickets:
-                total_days += (t.updated_at - t.created_at).total_seconds() / 86400
-            avg_close = round(total_days / closed_tickets.count(), 2)
+        avg_close_days = None
+        if stats['avg_close_seconds'] is not None:
+            avg_close_days = round(stats['avg_close_seconds'].total_seconds() / 86400, 2)
 
         data = {
-            'total': total,
-            'open': open_count,
-            'in_progress': in_progress,
-            'closed': closed,
-            'avg_close_days': avg_close,
+            'total': stats['total'],
+            'open': stats['open'],
+            'in_progress': stats['in_progress'],
+            'closed': stats['closed'],
+            'avg_close_days': avg_close_days,
         }
         return Response(data)
 
@@ -74,10 +75,13 @@ class DashboardByAgentView(APIView):
             Ticket.objects
             .exclude(assigned_to__isnull=True)
             .values('assigned_to__username')
-            .annotate(count=Count('id'))
+            .annotate(count=Count('id'), resolved=Count('id', filter=Q(status='closed')))
             .order_by('-count')
         )
-        data = [{'agent': r['assigned_to__username'], 'count': r['count']} for r in rows]
+        data = [
+            {'agent': r['assigned_to__username'], 'count': r['count'], 'resolved': r['resolved']}
+            for r in rows
+        ]
         return Response(data)
 
 

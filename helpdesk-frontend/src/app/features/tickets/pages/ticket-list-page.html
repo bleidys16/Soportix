@@ -1,7 +1,7 @@
 <div class="page-header">
   <div>
     <h1>{{ pageTitle() }}</h1>
-    <p class="page-subtitle">{{ tickets().length }} ticket{{ tickets().length === 1 ? '' : 's' }} visible{{ tickets().length === 1 ? '' : 's' }} según tus filtros</p>
+    <p class="page-subtitle">{{ totalCount() }} ticket{{ totalCount() === 1 ? '' : 's' }} según tus filtros</p>
   </div>
   @if (auth.getUserRole() !== 'admin') {
     <a mat-flat-button class="new-ticket-btn" routerLink="/tickets/new">
@@ -118,5 +118,13 @@
         </tr>
       }
     </table>
+
+    <mat-paginator
+      [length]="totalCount()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 25, 50, 100]"
+      (page)="onPageChange($event)"
+    />
   }
 </div>

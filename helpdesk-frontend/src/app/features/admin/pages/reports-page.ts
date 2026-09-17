@@ -35,8 +35,14 @@ export interface AgentPerformanceItem {
           <option value="30d">Últimos 30 días</option>
           <option value="all">Todo el historial</option>
         </select>
-        <button mat-flat-button class="export-report-btn" type="button" (click)="exportCsv()">
-          <mat-icon>download</mat-icon> Exportar Informe CSV
+        <button
+          mat-flat-button
+          class="export-report-btn"
+          type="button"
+          [disabled]="exportingCsv()"
+          (click)="exportCsv()"
+        >
+          <mat-icon>download</mat-icon> {{ exportingCsv() ? 'Exportando...' : 'Exportar Informe CSV' }}
         </button>
       </div>
     </div>
@@ -675,7 +681,6 @@ export class ReportsPage implements OnInit {
   stats = signal<DashboardStats>({ total: 0, open: 0, in_progress: 0, closed: 0, avg_close_days: null });
   categoryCounts = signal<CategoryCount[]>([]);
   agentCounts = signal<AgentCount[]>([]);
-  tickets = signal<Ticket[]>([]);
   selectedPeriod = signal<string>('30d');
 
   trendLabels = signal<string[]>([]);
@@ -696,21 +701,14 @@ export class ReportsPage implements OnInit {
   csatAverage = computed(() => '4.8');
   csatCount = computed(() => this.stats().closed || 12);
 
-  // Agent Performance Listing
+  // Agent Performance Listing (conteos ya agregados por el backend, sin traer todos los tickets)
   agentPerformances = computed<AgentPerformanceItem[]>(() => {
-    const agents = this.agentCounts();
-    const all = this.tickets();
-
-    return agents.map((a) => {
-      const assigned = all.filter((t) => (t.assigned_to_username || '').toLowerCase() === a.agent.toLowerCase());
-      const resolved = assigned.filter((t) => t.status === 'closed').length;
-      const totalCount = assigned.length || a.count;
-      const eff = totalCount > 0 ? Math.round((resolved / totalCount) * 100) : 85;
-
+    return this.agentCounts().map((a) => {
+      const eff = a.count > 0 ? Math.round((a.resolved / a.count) * 100) : 0;
       return {
         name: a.agent || 'Agente de Soporte',
-        total: totalCount,
-        resolved: resolved || Math.ceil(totalCount * 0.8),
+        total: a.count,
+        resolved: a.resolved,
         efficiency: eff,
       };
     });
@@ -733,10 +731,6 @@ export class ReportsPage implements OnInit {
     });
 
     this.dashboardService.getTicketsTrend().subscribe((trend) => this.buildTrend(trend));
-
-    this.ticketService.getAll().subscribe((t) => {
-      this.tickets.set(t);
-    });
   }
 
   getCategoryPercentage(count: number): number {
@@ -760,8 +754,22 @@ export class ReportsPage implements OnInit {
     ]);
   }
 
+  exportingCsv = signal(false);
+
   exportCsv() {
-    const ticketsList = this.tickets();
+    // Los tickets solo se traen al exportar (y no en cada carga de la página de
+    // reportes), con un límite acotado por el backend en vez de una consulta sin tope.
+    this.exportingCsv.set(true);
+    this.ticketService.getAll({ pageSize: 500 }).subscribe({
+      next: (page) => {
+        this.downloadCsv(page.results);
+        this.exportingCsv.set(false);
+      },
+      error: () => this.exportingCsv.set(false),
+    });
+  }
+
+  private downloadCsv(ticketsList: Ticket[]) {
     const header = ['ID', 'Título', 'Estado', 'Prioridad', 'Categoría', 'Creado por', 'Asignado a', 'Fecha creación'];
     const rows = ticketsList.map((t) => [
       t.id,

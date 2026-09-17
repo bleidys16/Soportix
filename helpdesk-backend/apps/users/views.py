@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User
+from django.db.models import Count
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
+from config.pagination import StandardResultsSetPagination
 from .models import UserProfile
 from .serializers import RegisterSerializer, UserSerializer, CustomTokenObtainPairSerializer
 
@@ -29,12 +31,19 @@ class UserMeView(generics.RetrieveAPIView):
 # Vista para que el Admin liste todos los usuarios
 class UserListView(APIView):
     permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
 
     def get(self, request):
         if request.user.profile.role != 'admin':
             return Response(status=status.HTTP_403_FORBIDDEN)
-        users = User.objects.select_related('profile').all().order_by('username')
-        return Response(UserSerializer(users, many=True).data)
+        users = (
+            User.objects.select_related('profile')
+            .annotate(ticket_count=Count('tickets_created'))
+            .order_by('username')
+        )
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(users, request)
+        return paginator.get_paginated_response(UserSerializer(page, many=True).data)
 
 
 # Vista para que el Admin cambie el rol de un usuario
