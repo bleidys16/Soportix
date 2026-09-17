@@ -184,26 +184,164 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
-.roles-section,
-.features-section {
+.features-section,
+.steps-section,
+.faq-section {
   max-width: 1100px;
   margin: 0 auto;
   padding: 4rem 1.5rem;
   text-align: center;
 }
 
-.roles-band {
-  background: radial-gradient(120% 140% at 0% 100%, rgba(255, 111, 97, 0.4) 0%, rgba(255, 111, 97, 0.12) 32%, #ffffff 60%);
+.steps-section h2,
+.faq-section h2 {
+  font-family: 'Switzer', 'Geist', sans-serif;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  line-height: 1.3;
+  color: #081454;
+  margin: 0 0 2.5rem;
+}
+
+.steps-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.step-card {
+  flex: 1;
+  max-width: 260px;
+  text-align: center;
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--lp-coral);
+  background: rgba(255, 111, 97, 0.1);
+  margin-bottom: 0.9rem;
+}
+
+.step-card h3 {
+  font-family: 'Switzer', 'Geist', sans-serif;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: #221a44;
+}
+
+.step-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #5a5478;
+}
+
+.step-arrow {
+  flex: 0 0 auto;
+  color: rgba(8, 20, 84, 0.25);
+  margin-top: 10px;
+}
+
+.faq-band {
+  background: #f6f5fa;
+}
+
+.faq-list {
+  text-align: left;
+}
+
+.faq-item {
+  border-bottom: 1px solid rgba(8, 20, 84, 0.1);
+  padding: 1.1rem 0;
+
+  &:first-child {
+    border-top: 1px solid rgba(8, 20, 84, 0.1);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    cursor: pointer;
+    list-style: none;
+    font-family: 'Switzer', 'Geist', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #221a44;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .faq-toggle {
+    flex: 0 0 auto;
+    color: var(--lp-indigo);
+    transition: transform 0.15s ease;
+  }
+
+  &[open] .faq-toggle {
+    transform: rotate(45deg);
+  }
+
+  p {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #5a5478;
+  }
+}
+
+.closing-cta {
+  background: #fff;
+  padding: 4rem 1.5rem;
+}
+
+.closing-cta-card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3.5rem 2rem;
+  border-radius: 28px;
+  background: #0a0a1a;
+  box-shadow: 0 24px 48px -16px rgba(10, 10, 26, 0.35);
+  text-align: center;
+  color: #fff;
+
+  h2 {
+    font-family: 'Switzer', 'Geist', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    line-height: 1.3;
+    margin: 0 0 0.85rem;
+  }
+
+  p {
+    font-family: 'Switzer', 'Geist', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin: 0 0 2rem;
+  }
+}
+
+.closing-cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .features-band {
   background: radial-gradient(120% 140% at 100% 100%, rgba(8, 20, 84, 0.45) 0%, rgba(8, 20, 84, 0.12) 32%, #ffffff 60%);
-}
-
-.roles-section h2 {
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
-  color: #081454;
-  margin: 0 0 2.5rem;
 }
 
 .features-section {
@@ -224,57 +362,6 @@
   line-height: 1.25;
   color: #081454;
   margin: 0 0 1.75rem;
-}
-
-.roles-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  text-align: left;
-}
-
-.role-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 1.5rem 0;
-  border-bottom: 1px solid rgba(8, 20, 84, 0.1);
-}
-
-.role-card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 0.6rem;
-}
-
-.role-number {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--lp-indigo);
-  background: rgba(8, 20, 84, 0.05);
-}
-
-.role-card h3 {
-  font-family: 'Switzer', 'Geist', sans-serif;
-  font-weight: 600;
-  margin: 0;
-  font-size: 1rem;
-  color: #221a44;
-}
-
-.role-card p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #5a5478;
 }
 
 .features-list {
@@ -381,9 +468,19 @@
 }
 
 @media (max-width: 720px) {
-  .roles-grid,
   .features-list {
     grid-template-columns: 1fr;
+  }
+
+  .steps-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.75rem;
+  }
+
+  .step-arrow {
+    transform: rotate(90deg);
+    margin-top: 0;
   }
 
   .nav-link {
@@ -398,6 +495,15 @@
   .trust-strip {
     font-size: 0.7rem;
     gap: 0.3rem;
+  }
+
+  .closing-cta {
+    padding: 3rem 1.25rem;
+  }
+
+  .closing-cta-card {
+    padding: 2.5rem 1.5rem;
+    border-radius: 20px;
   }
 }
 
@@ -429,7 +535,8 @@
     font-size: clamp(1.6rem, 7vw, 2rem);
   }
 
-  .hero-actions {
+  .hero-actions,
+  .closing-cta-actions {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;

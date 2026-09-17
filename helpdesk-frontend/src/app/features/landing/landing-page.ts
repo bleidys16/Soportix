@@ -27,18 +27,37 @@ export class LandingPage implements AfterViewInit {
     'Adjuntos',
   ];
 
-  roles = [
+  steps = [
     {
-      title: 'Usuario',
-      text: 'Crea tickets, da seguimiento a cada caso y califica la atención recibida al cerrarlo.',
+      title: 'Creas el ticket',
+      text: 'Describes el problema, eliges la categoría y adjuntas capturas si hace falta.',
     },
     {
-      title: 'Agente',
-      text: 'Gestiona los tickets asignados, responde con plantillas predefinidas y prioriza lo más urgente.',
+      title: 'El agente responde',
+      text: 'Un agente toma el caso, comenta el avance y actualiza el estado mientras lo resuelve.',
     },
     {
-      title: 'Administrador',
-      text: 'Supervisa reportes, categorías, usuarios y el desempeño general del equipo de soporte.',
+      title: 'Calificas el cierre',
+      text: 'Cuando el agente lo cierra, calificas la atención recibida con estrellas.',
+    },
+  ];
+
+  faqs = [
+    {
+      question: '¿Necesito tarjeta o registrarme para probarlo?',
+      answer: 'No. El botón "Probar demo" te da acceso inmediato con una cuenta de solo lectura, sin formularios.',
+    },
+    {
+      question: '¿La demo puede dañar los datos de ejemplo?',
+      answer: 'No. La cuenta demo puede navegar toda la app, pero tiene bloqueada cualquier escritura: no crea, edita ni borra nada.',
+    },
+    {
+      question: '¿Cuántos agentes, usuarios o categorías puedo tener?',
+      answer: 'Los que tu equipo necesite. El administrador crea usuarios, asigna roles y define categorías sin límite desde su panel.',
+    },
+    {
+      question: '¿Cualquiera puede ver mis tickets?',
+      answer: 'No. Cada usuario ve solo los tickets que creó; los agentes ven los que tienen asignados y el administrador tiene la vista completa.',
     },
   ];
 

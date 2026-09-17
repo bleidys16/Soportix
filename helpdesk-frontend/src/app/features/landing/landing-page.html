@@ -47,18 +47,19 @@
     </div>
   </section>
 
-  <section class="roles-band">
-    <div class="roles-section">
-      <h2>Un flujo pensado para cada rol</h2>
-      <div class="roles-grid">
-        @for (r of roles; track r.title; let i = $index) {
-          <div class="role-card">
-            <div class="role-card-header">
-              <span class="role-number">{{ i + 1 }}</span>
-              <h3>{{ r.title }}</h3>
-            </div>
-            <p>{{ r.text }}</p>
+  <section class="steps-band">
+    <div class="steps-section">
+      <h2>Así funciona, de principio a fin</h2>
+      <div class="steps-row">
+        @for (s of steps; track s.title; let i = $index; let last = $last) {
+          <div class="step-card">
+            <span class="step-number">{{ i + 1 }}</span>
+            <h3>{{ s.title }}</h3>
+            <p>{{ s.text }}</p>
           </div>
+          @if (!last) {
+            <mat-icon class="step-arrow">arrow_forward</mat-icon>
+          }
         }
       </div>
     </div>
@@ -86,6 +87,43 @@
             </div>
           }
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq-band">
+    <div class="faq-section">
+      <h2>Preguntas frecuentes</h2>
+      <div class="faq-list">
+        @for (q of faqs; track q.question) {
+          <details class="faq-item">
+            <summary>
+              {{ q.question }}
+              <mat-icon class="faq-toggle">add</mat-icon>
+            </summary>
+            <p>{{ q.answer }}</p>
+          </details>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="closing-cta">
+    <div class="closing-cta-card">
+      <h2>Ordena el soporte de tu equipo hoy mismo</h2>
+      <p>Sin instalaciones ni tarjetas. Entra con la demo o crea tu cuenta en un minuto.</p>
+      <div class="closing-cta-actions">
+        <button
+          mat-flat-button
+          class="demo-btn"
+          type="button"
+          [disabled]="demoLoading()"
+          (click)="tryDemo()"
+        >
+          <mat-icon>play_arrow</mat-icon>
+          {{ demoLoading() ? 'Cargando demo...' : 'Probar demo' }}
+        </button>
+        <a routerLink="/register" mat-stroked-button class="login-btn">Crear cuenta</a>
       </div>
     </div>
   </section>
