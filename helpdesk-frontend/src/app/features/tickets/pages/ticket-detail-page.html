@@ -27,21 +27,38 @@
           <div class="attachments-section">
             <h3>Adjuntos ({{ attachments().length }})</h3>
 
-            @if (attachments().length) {
+            @if (imageAttachments().length) {
+              <div class="attachment-gallery">
+                @for (a of imageAttachments(); track a.id) {
+                  <div class="gallery-item">
+                    <a [href]="a.file" target="_blank" rel="noopener" class="gallery-link">
+                      <img
+                        class="gallery-image"
+                        [src]="a.file"
+                        [alt]="a.file_name"
+                        (error)="markThumbBroken(a.id)"
+                      />
+                    </a>
+                    <button
+                      mat-icon-button
+                      class="gallery-delete-btn"
+                      type="button"
+                      (click)="deleteAttachment(a)"
+                      aria-label="Eliminar adjunto"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (fileAttachments().length) {
               <ul class="attachment-list">
-                @for (a of attachments(); track a.id) {
+                @for (a of fileAttachments(); track a.id) {
                   <li class="attachment-item">
                     <a [href]="a.file" target="_blank" rel="noopener">
-                      @if (isImage(a.file_name) && !brokenThumbs().has(a.id)) {
-                        <img
-                          class="attachment-thumb"
-                          [src]="a.file"
-                          [alt]="a.file_name"
-                          (error)="markThumbBroken(a.id)"
-                        />
-                      } @else {
-                        <mat-icon>attach_file</mat-icon>
-                      }
+                      <mat-icon>attach_file</mat-icon>
                       {{ a.file_name }}
                     </a>
                     <button

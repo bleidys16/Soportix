@@ -69,8 +69,13 @@ from django.db.models import Q
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         username_or_email = attrs.get(self.username_field)
-        if username_or_email:
-            user = User.objects.filter(Q(username__iexact=username_or_email) | Q(email__iexact=username_or_email)).first()
+        # Los usernames de esta app nunca llevan '@' (se generan solo con letras,
+        # números y puntos), así que solo vale la pena la consulta extra de
+        # traducir email -> username cuando realmente parece un email; para el
+        # caso común (login con username) esto evita un viaje de ida y vuelta
+        # completo a la base de datos remota.
+        if username_or_email and '@' in username_or_email:
+            user = User.objects.filter(email__iexact=username_or_email).first()
             if user:
                 attrs[self.username_field] = user.username
         return super().validate(attrs)

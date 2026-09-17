@@ -121,12 +121,20 @@ import { PriorityTagComponent } from '../../../core/components/priority-tag/prio
 
     .attachments-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--sx-border); }
     .attachments-section h3 { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--sx-text-primary); }
+
+    .attachment-gallery { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 0.75rem; }
+    .gallery-item { position: relative; width: 220px; max-width: 100%; height: 165px; border-radius: 10px; overflow: hidden; background: var(--sx-page-bg); }
+    .gallery-link { display: block; width: 100%; height: 100%; }
+    .gallery-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-delete-btn { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; line-height: 28px; background: rgba(0, 0, 0, 0.55) !important; color: #fff !important; }
+    .gallery-delete-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .gallery-delete-btn:hover { background: rgba(0, 0, 0, 0.75) !important; }
+
     .attachment-list { list-style: none; margin: 0 0 0.75rem; padding: 0; display: flex; flex-direction: column; gap: 6px; }
     .attachment-item { display: flex; align-items: center; gap: 8px; font-size: 0.8125rem; }
     .attachment-item a { color: var(--sx-primary); text-decoration: none; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .attachment-item a:hover { text-decoration: underline; }
     .attachment-item mat-icon { font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
-    .attachment-thumb { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
     .attachment-item .delete-attachment-btn { width: 28px; height: 28px; line-height: 28px; flex-shrink: 0; }
     .attachment-item .delete-attachment-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .attach-btn { border-radius: var(--sx-radius-control); }
@@ -217,6 +225,13 @@ export class TicketDetailPage implements OnInit {
 
   private readonly imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
   brokenThumbs = signal<Set<number>>(new Set());
+
+  imageAttachments = computed(() =>
+    this.attachments().filter((a) => this.isImage(a.file_name) && !this.brokenThumbs().has(a.id))
+  );
+  fileAttachments = computed(() =>
+    this.attachments().filter((a) => !this.isImage(a.file_name) || this.brokenThumbs().has(a.id))
+  );
 
   isImage(fileName: string): boolean {
     const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
