@@ -66,13 +66,17 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         user = self.request.user
+        data = serializer.validated_data
+
         if user.profile.role == 'user':
-            data = serializer.validated_data
-            if data.get('status') not in (None, 'closed'):
-                raise PermissionDenied('Solo puedes marcar tus propios tickets como resueltos.')
+            if 'status' in data:
+                raise PermissionDenied('No tienes permisos para cambiar el estado del ticket.')
             for field in data.keys():
-                if field not in ('status', 'resolution_notes', 'csat_rating', 'csat_comment'):
+                if field not in ('csat_rating', 'csat_comment'):
                     raise PermissionDenied('No tienes permisos para modificar ese campo.')
+
+        if data.get('status') == 'closed' and user.profile.role != 'agent':
+            raise PermissionDenied('Solo un agente puede cerrar un ticket.')
 
         ticket = serializer.instance
         old_status = ticket.status

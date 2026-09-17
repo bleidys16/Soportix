@@ -210,7 +210,7 @@
             <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
               <mat-label>Estado</mat-label>
               <mat-select [value]="t.status" (selectionChange)="changeStatus($event.value)">
-                @for (s of statuses; track s) {
+                @for (s of statusesFor(auth.getUserRole()); track s) {
                   <mat-option [value]="s">{{ statusLabel[s] }}</mat-option>
                 }
               </mat-select>
@@ -223,16 +223,10 @@
             }
           }
 
-          @if (auth.getUserRole() === 'user' && t.status !== 'closed') {
-            <button mat-raised-button class="resolve-btn" type="button" (click)="markAsResolved()">
-              <mat-icon>check_circle</mat-icon> Marcar como Resuelto
-            </button>
-          }
-
           @if (closingTicket()) {
             <div class="close-ticket-form">
               <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-                <mat-label>{{ userResolveMode() ? '¿Qué solucionó el problema? (opcional)' : 'Nota de resolución' }}</mat-label>
+                <mat-label>Nota de resolución</mat-label>
                 <textarea
                   matInput
                   [(ngModel)]="resolutionNotes"
@@ -250,9 +244,9 @@
                   color="primary"
                   type="button"
                   (click)="confirmClose()"
-                  [disabled]="!userResolveMode() && !resolutionNotes.trim()"
+                  [disabled]="!resolutionNotes.trim()"
                 >
-                  {{ userResolveMode() ? 'Confirmar resolución' : 'Confirmar cierre' }}
+                  Confirmar cierre
                 </button>
               </div>
             </div>

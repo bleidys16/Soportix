@@ -34,6 +34,9 @@ services:
         value: "ep-plain-star-athckzxe-pooler.c-9.us-east-1.aws.neon.tech"
       - key: DB_PORT
         value: "5432"
+      # Cloudinary: adjuntos de tickets (persisten entre deploys, el disco de Render no)
+      - key: CLOUDINARY_URL
+        sync: false
 
   # Frontend - Angular SPA (Static Site)
   - type: web

@@ -160,6 +160,7 @@ Abre **http://localhost:4200** en el navegador. El superusuario que creaste con 
 | `CORS_ALLOWED_ORIGINS` | No (default `http://localhost:4200`) | Orígenes permitidos para CORS |
 | `DB_ENGINE` | No (default SQLite) | `django.db.backends.postgresql` para usar Postgres |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Solo si usas Postgres | Credenciales de conexión |
+| `CLOUDINARY_URL` | No | Si se define, los adjuntos de tickets se guardan en [Cloudinary](https://cloudinary.com/) en vez de disco local (necesario en Render, cuyo disco es efímero). Formato: `cloudinary://api_key:api_secret@cloud_name` |
 
 ## Estructura del proyecto
 
