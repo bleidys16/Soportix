@@ -32,9 +32,6 @@
             ],
             "styles": [
               "src/styles.scss"
-            ]
-            "styles": [
-              "src/styles.scss"
             ],
             "define": {
               "NG_API_URL": "process.env.NG_API_URL"
@@ -42,6 +39,16 @@
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": {
+                  "inline": false
+                }
+              },
               "budgets": [
                 {
                   "type": "initial",
