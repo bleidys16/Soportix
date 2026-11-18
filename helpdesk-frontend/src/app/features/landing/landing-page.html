@@ -1,4 +1,105 @@
 <div class="landing">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+
+    <!-- Transparent Navbar Overlay -->
+    <header class="landing-nav">
+      <div class="landing-nav-inner">
+        <a routerLink="/" class="brand-link" (click)="closeMobileMenu()">
+          <app-logo [size]="34" />
+          <span class="brand-name">Soportix</span>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="nav-links desktop-only" aria-label="Navegación principal">
+          <button type="button" (click)="scrollToSection('steps')" class="nav-link-btn">Cómo funciona</button>
+          <button type="button" (click)="scrollToSection('features')" class="nav-link-btn">Características</button>
+          <button type="button" (click)="scrollToSection('faq')" class="nav-link-btn">Preguntas</button>
+          <a routerLink="/login" class="nav-link-btn">Iniciar sesión</a>
+        </nav>
+
+        <!-- Desktop CTA Action -->
+        <div class="nav-actions desktop-only">
+          <button
+            mat-flat-button
+            class="nav-pill-btn"
+            type="button"
+            [disabled]="demoLoading()"
+            (click)="tryDemo()"
+          >
+            {{ demoLoading() ? 'Cargando...' : 'Probar demo' }}
+          </button>
+        </div>
+
+        <!-- Mobile Menu Hamburger Button -->
+        <button
+          class="mobile-menu-btn"
+          type="button"
+          (click)="toggleMobileMenu()"
+          [attr.aria-label]="mobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú de navegación'"
+          [attr.aria-expanded]="mobileMenuOpen()"
+        >
+          <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Mobile Dropdown Menu -->
+      @if (mobileMenuOpen()) {
+        <div class="mobile-menu-panel">
+          <nav class="mobile-nav-list">
+            <button type="button" (click)="scrollToSection('steps')" class="mobile-nav-item">Cómo funciona</button>
+            <button type="button" (click)="scrollToSection('features')" class="mobile-nav-item">Características</button>
+            <button type="button" (click)="scrollToSection('faq')" class="mobile-nav-item">Preguntas frecuentes</button>
+            <a routerLink="/login" class="mobile-nav-item" (click)="closeMobileMenu()">Iniciar sesión</a>
+          </nav>
+          <div class="mobile-menu-actions">
+            <button
+              mat-flat-button
+              class="mobile-pill-btn"
+              type="button"
+              [disabled]="demoLoading()"
+              (click)="tryDemo()"
+            >
+              {{ demoLoading() ? 'Cargando demo...' : 'Probar demo' }}
+            </button>
+            <a routerLink="/register" mat-stroked-button class="mobile-outline-btn" (click)="closeMobileMenu()">
+              Crear cuenta
+            </a>
+          </div>
+        </div>
+      }
+    </header>
+
+    <!-- Hero Bottom Content: Clean 1-Column Layout -->
+    <div class="hero-bottom-wrap">
+      <div class="hero-col-left">
+        <h1>Mesa de ayuda centralizada para tu equipo de trabajo</h1>
+        <p class="hero-subtitle">
+          Organiza incidencias, coordina a los agentes de soporte y monitorea los tiempos de respuesta desde una única plataforma.
+        </p>
+        <div class="hero-actions">
+          <button
+            mat-flat-button
+            class="demo-btn"
+            type="button"
+            [disabled]="demoLoading()"
+            (click)="tryDemo()"
+          >
+            <mat-icon class="btn-icon">play_arrow</mat-icon>
+            {{ demoLoading() ? 'Cargando demo...' : 'Probar demo' }}
+          </button>
+          <a routerLink="/login" mat-stroked-button class="login-btn">Iniciar sesión</a>
+        </div>
+        @if (demoError()) {
+          <p class="demo-error">{{ demoError() }}</p>
+        }
+        <p class="demo-hint">Acceso de prueba inmediato sin formularios ni tarjeta.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Strip Marquee Ribbon -->
   <div class="trust-strip">
     <div class="trust-track">
       @for (i of [0, 1]; track i) {
@@ -10,44 +111,7 @@
     </div>
   </div>
 
-  <section class="hero">
-    <div class="hero-overlay"></div>
-    <header class="landing-nav">
-      <div class="landing-nav-inner">
-        <app-logo [size]="36" />
-        <span class="brand-name">Soportix</span>
-        <nav class="nav-links">
-          <a routerLink="/login" class="nav-link">Iniciar sesión</a>
-          <a routerLink="/register" mat-stroked-button class="nav-register-btn">Crear cuenta</a>
-        </nav>
-      </div>
-    </header>
-    <div class="hero-content">
-      <h1>Organiza cada ticket, agente y respuesta en un solo lugar</h1>
-      <p class="hero-subtitle">
-        Soportix es una mesa de ayuda simple y completa para gestionar el soporte de tu equipo de principio a fin.
-      </p>
-      <div class="hero-actions">
-        <button
-          mat-flat-button
-          class="demo-btn"
-          type="button"
-          [disabled]="demoLoading()"
-          (click)="tryDemo()"
-        >
-          <mat-icon>play_arrow</mat-icon>
-          {{ demoLoading() ? 'Cargando demo...' : 'Probar demo' }}
-        </button>
-        <a routerLink="/login" mat-stroked-button class="login-btn">Iniciar sesión</a>
-      </div>
-      @if (demoError()) {
-        <p class="demo-error">{{ demoError() }}</p>
-      }
-      <p class="demo-hint">Sin registro. Entras directo con una cuenta de prueba.</p>
-    </div>
-  </section>
-
-  <section class="steps-band">
+  <section class="steps-band" id="steps">
     <div class="steps-section">
       <h2>Así funciona, de principio a fin</h2>
       <div class="steps-row">
@@ -65,7 +129,7 @@
     </div>
   </section>
 
-  <section class="features-band">
+  <section class="features-band" id="features">
     <div class="features-section">
       <div class="features-layout">
         <div class="features-intro">
@@ -91,7 +155,7 @@
     </div>
   </section>
 
-  <section class="faq-band">
+  <section class="faq-band" id="faq">
     <div class="faq-section">
       <h2>Preguntas frecuentes</h2>
       <div class="faq-list">
@@ -129,8 +193,157 @@
   </section>
 
   <footer class="landing-footer">
-    <app-logo [size]="28" />
-    <span>Soportix</span>
-    <span class="footer-copy">&copy; 2026 Soportix. Proyecto de demostración.</span>
+    <div class="footer-container">
+      <div class="footer-grid">
+        <!-- Col 1: Brand & Description -->
+        <div class="footer-col brand-col">
+          <div class="footer-brand">
+            <app-logo [size]="32" />
+            <span class="footer-brand-name">Soportix</span>
+          </div>
+          <p class="footer-desc">
+            Plataforma de mesa de ayuda y gestión de tickets para centralizar la atención técnica y operativa de equipos de trabajo.
+          </p>
+        </div>
+
+        <!-- Col 2: Navigation Links -->
+        <div class="footer-col">
+          <h4 class="footer-heading">Plataforma</h4>
+          <ul class="footer-links">
+            <li><button type="button" (click)="scrollToSection('steps')" class="footer-link-btn">Cómo funciona</button></li>
+            <li><button type="button" (click)="scrollToSection('features')" class="footer-link-btn">Características</button></li>
+            <li><button type="button" (click)="scrollToSection('faq')" class="footer-link-btn">Preguntas frecuentes</button></li>
+            <li><a routerLink="/login" class="footer-link">Iniciar sesión</a></li>
+            <li><button type="button" (click)="tryDemo()" class="footer-link-btn footer-demo-btn" [disabled]="demoLoading()">Probar demo</button></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Legal & Privacy -->
+        <div class="footer-col">
+          <h4 class="footer-heading">Legal y Privacidad</h4>
+          <ul class="footer-links">
+            <li><button type="button" (click)="openLegalModal('privacy')" class="footer-link-btn">Políticas de privacidad</button></li>
+            <li><button type="button" (click)="openLegalModal('terms')" class="footer-link-btn">Términos del servicio</button></li>
+            <li><button type="button" (click)="openLegalModal('security')" class="footer-link-btn">Seguridad de datos</button></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Soporte y Estado -->
+        <div class="footer-col">
+          <h4 class="footer-heading">Soporte</h4>
+          <ul class="footer-links">
+            <li><span class="footer-info-item">Mesa de ayuda activa</span></li>
+            <li><span class="footer-info-item">Roles: Admin, Agente y Usuario</span></li>
+            <li><span class="footer-info-item">Entorno de producción estable</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Sub-footer Bottom Bar -->
+      <div class="footer-bottom">
+        <p class="footer-copy">&copy; 2026 Soportix. Todos los derechos reservados.</p>
+        <div class="footer-sub-links">
+          <button type="button" (click)="openLegalModal('privacy')" class="footer-sub-link">Privacidad</button>
+          <span class="footer-dot">&middot;</span>
+          <button type="button" (click)="openLegalModal('terms')" class="footer-sub-link">Términos</button>
+          <span class="footer-dot">&middot;</span>
+          <button type="button" (click)="openLegalModal('security')" class="footer-sub-link">Seguridad</button>
+        </div>
+      </div>
+    </div>
   </footer>
+
+  <!-- Legal Information Modal Dialog -->
+  @if (legalModal()) {
+    <div class="legal-modal-backdrop" (click)="closeLegalModal()">
+      <div
+        class="legal-modal-dialog"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-labelledby]="'modal-title-' + legalModal()"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="legal-modal-header">
+          @if (legalModal() === 'privacy') {
+            <h3 id="modal-title-privacy">Políticas de Privacidad</h3>
+          } @else if (legalModal() === 'terms') {
+            <h3 id="modal-title-terms">Términos del Servicio</h3>
+          } @else if (legalModal() === 'security') {
+            <h3 id="modal-title-security">Seguridad y Tratamiento de Datos</h3>
+          }
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="closeLegalModal()"
+            aria-label="Cerrar ventana modal"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="legal-modal-body">
+          @if (legalModal() === 'privacy') {
+            <div class="legal-content">
+              <h4>1. Responsable del tratamiento</h4>
+              <p>Soportix es una plataforma de mesa de ayuda orientada a la gestión de solicitudes y tickets de soporte técnico para equipos y organizaciones.</p>
+
+              <h4>2. Datos recopilados</h4>
+              <p>Para la prestación del servicio se procesan exclusivamente los datos necesarios para la autenticación y resolución de incidencias:</p>
+              <ul>
+                <li>Nombre de usuario y dirección de correo electrónico corporativo o personal.</li>
+                <li>Contraseñas almacenadas bajo cifrado unidireccional estándar (hash PBKDF2/SHA256).</li>
+                <li>Contenido de los tickets, comentarios y archivos adjuntos cargados voluntariamente por los usuarios.</li>
+                <li>Calificaciones de satisfacción del servicio (CSAT) asociadas a tickets cerrados.</li>
+              </ul>
+
+              <h4>3. Uso de cookies y sesiones</h4>
+              <p>Soportix utiliza únicamente identificadores técnicos de sesión y tokens de autenticación segura (JWT) almacenados localmente para mantener activa la sesión del usuario. No se utilizan cookies de terceros ni rastreadores publicitarios.</p>
+
+              <h4>4. Conservación y confidencialidad</h4>
+              <p>La información contenida en las conversaciones de soporte es confidencial y solo accesible por los agentes asignados, administradores de la organización y el usuario creador del ticket según el control de acceso basado en roles (RBAC).</p>
+            </div>
+          } @else if (legalModal() === 'terms') {
+            <div class="legal-content">
+              <h4>1. Objeto del servicio</h4>
+              <p>Soportix provee una herramienta de software como servicio para la recepción, asignación, seguimiento y resolución de tickets de soporte técnico e incidencias operativas.</p>
+
+              <h4>2. Cuentas y roles de usuario</h4>
+              <p>El acceso al sistema se segmenta en tres perfiles definidos:</p>
+              <ul>
+                <li><strong>Usuario final:</strong> Creación de tickets propios, visualización del estado y envío de calificaciones.</li>
+                <li><strong>Agente de soporte:</strong> Atención de tickets asignados, uso de respuestas rápidas y actualización de estados de resolución.</li>
+                <li><strong>Administrador:</strong> Configuración global de categorías, gestión de usuarios y consulta de métricas de rendimiento.</li>
+              </ul>
+
+              <h4>3. Uso aceptable</h4>
+              <p>Los usuarios se comprometen a utilizar la mesa de ayuda de manera responsable, evitando la carga de archivos maliciosos, contenido que vulnere la propiedad intelectual o datos sensibles innecesarios para la resolución del soporte.</p>
+
+              <h4>4. Modo demostración</h4>
+              <p>Las sesiones iniciadas mediante el modo "Probar demo" operan bajo una cuenta de solo lectura para la exploración de la interfaz, con restricciones automáticas de modificación de datos.</p>
+            </div>
+          } @else if (legalModal() === 'security') {
+            <div class="legal-content">
+              <h4>1. Seguridad de las comunicaciones</h4>
+              <p>Todo el tráfico entre el navegador y los servidores de Soportix viaja encriptado mediante el protocolo HTTPS con certificados TLS 1.3 vigentes.</p>
+
+              <h4>2. Autenticación y control de acceso</h4>
+              <p>Las peticiones a la API están protegidas mediante tokens JWT firmados criptográficamente, con expiración automática y verificación estricta de permisos por rol en cada endpoint.</p>
+
+              <h4>3. Gestión de archivos adjuntos</h4>
+              <p>Los archivos y capturas anexados a los tickets son validados por extensión y tamaño antes de su almacenamiento seguro en la nube, restringiendo su descarga a usuarios autorizados.</p>
+
+              <h4>4. Integridad de la base de datos</h4>
+              <p>La base de datos relacional opera con respaldos programados, aislamiento de entornos y protección contra inyecciones SQL a través del ORM del backend.</p>
+            </div>
+          }
+        </div>
+
+        <div class="legal-modal-footer">
+          <button mat-flat-button class="modal-confirm-btn" type="button" (click)="closeLegalModal()">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

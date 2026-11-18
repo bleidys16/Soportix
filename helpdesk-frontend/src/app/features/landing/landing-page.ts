@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,8 @@ export class LandingPage implements AfterViewInit {
 
   demoLoading = signal(false);
   demoError = signal<string | null>(null);
+  mobileMenuOpen = signal(false);
+  legalModal = signal<'privacy' | 'terms' | 'security' | null>(null);
 
   trustItems = [
     'Gestión de tickets',
@@ -125,6 +127,7 @@ export class LandingPage implements AfterViewInit {
   }
 
   tryDemo(): void {
+    this.closeMobileMenu();
     this.demoError.set(null);
     this.demoLoading.set(true);
     this.auth.login({ username: 'demo', password: 'Demo123456' }, false).subscribe({
@@ -134,5 +137,39 @@ export class LandingPage implements AfterViewInit {
         this.demoError.set('No se pudo iniciar la demo. Intenta de nuevo.');
       },
     });
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update((open) => !open);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
+
+  scrollToSection(sectionId: string): void {
+    this.closeMobileMenu();
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  openLegalModal(type: 'privacy' | 'terms' | 'security'): void {
+    this.closeMobileMenu();
+    this.legalModal.set(type);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeLegalModal(): void {
+    this.legalModal.set(null);
+    document.body.style.overflow = '';
+  }
+
+  @HostListener('window:keydown.escape')
+  onEscape(): void {
+    if (this.legalModal()) {
+      this.closeLegalModal();
+    }
   }
 }
