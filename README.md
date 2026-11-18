@@ -1,180 +1,207 @@
 <div align="center">
-  <img src="helpdesk-frontend/public/soportix-logo.png" alt="Soportix" width="150" />
+  <img src="helpdesk-frontend/public/soportix-logo.png" alt="Soportix Logo" width="130" />
 
   <h1>Soportix</h1>
-  <p><strong>Helpdesk / Mesa de Ayuda</strong> — gestión de tickets de soporte técnico con control de acceso por roles.</p>
+  <p><strong>Plataforma centralizada de soporte técnico y gestión de incidencias</strong></p>
 
   <p>
-    <img src="https://img.shields.io/badge/Python-3.12-0E21A0?logo=python&logoColor=white" alt="Python" />
-    <img src="https://img.shields.io/badge/Django-5.2-4D2FB2?logo=django&logoColor=white" alt="Django" />
-    <img src="https://img.shields.io/badge/Django%20REST%20Framework-3.17-081454?logo=django&logoColor=white" alt="Django REST Framework" />
-    <img src="https://img.shields.io/badge/Angular-22-FF6F61?logo=angular&logoColor=white" alt="Angular" />
-    <img src="https://img.shields.io/badge/TypeScript-5-9B8EC7?logo=typescript&logoColor=white" alt="TypeScript" />
+    <a href="https://soportix-1.onrender.com/" target="_blank">
+      <img src="https://img.shields.io/badge/Demo_en_vivo-Probar_Soportix-FF6F61?style=for-the-badge&logo=render&logoColor=white" alt="Demo en vivo" />
+    </a>
+  </p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Angular-22-FF6F61?logo=angular&logoColor=white" alt="Angular 22" />
+    <img src="https://img.shields.io/badge/Django-5.2-4D2FB2?logo=django&logoColor=white" alt="Django 5.2" />
+    <img src="https://img.shields.io/badge/Django_REST-Framework-081454?logo=django&logoColor=white" alt="DRF" />
     <img src="https://img.shields.io/badge/PostgreSQL-Neon-0E21A0?logo=postgresql&logoColor=white" alt="PostgreSQL" />
-    <img src="https://img.shields.io/badge/Auth-JWT-081454?logo=jsonwebtokens&logoColor=white" alt="JWT" />
+    <img src="https://img.shields.io/badge/TypeScript-5-9B8EC7?logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Licencia-MIT-green" alt="Licencia MIT" />
   </p>
 </div>
 
-## Índice
+---
 
-- [Stack técnico](#stack-técnico)
-- [Landing y demo pública](#landing-y-demo-pública)
-- [Roles del sistema](#roles-del-sistema)
-- [Cuentas de prueba](#cuentas-de-prueba)
-- [Requisitos previos](#requisitos-previos)
-- [Instalación](#instalación)
-- [Levantar el proyecto](#levantar-el-proyecto)
-- [Variables de entorno](#variables-de-entorno-backend)
-- [Estructura del proyecto](#estructura-del-proyecto)
+## 📌 ¿Qué es Soportix?
 
-## Stack técnico
+**Soportix** es una plataforma web tipo *Helpdesk* (mesa de ayuda) diseñada para ordenar y agilizar la atención de problemas técnicos dentro de una empresa o equipo de trabajo.
 
-**Backend**
-- Django 5.2 + Django REST Framework
-- Autenticación JWT (`djangorestframework-simplejwt`) con refresco automático de token, login con usuario o email
-- PostgreSQL (producción, vía Neon) o SQLite (desarrollo local, por defecto)
-- `django-filter`, `django-cors-headers`
+### El problema que resuelve
+En muchas organizaciones, las solicitudes de ayuda se envían por canales dispersos: mensajes de WhatsApp, correos electrónicos informales o llamadas. Esto provoca:
+- Solicitudes olvidadas o duplicadas.
+- Falta de claridad en quién está atendiendo cada caso.
+- Cero visibilidad sobre los tiempos de respuesta o la satisfacción del usuario.
 
-**Frontend**
-- Angular 22 (componentes standalone, signals, zoneless)
-- Angular Material + Angular CDK
-- Chart.js para las gráficas del dashboard
-- Tipografía Geist + Switzer (Fontshare) + Material Symbols Outlined
+### La solución
+Soportix centraliza cada solicitud en un **ticket único**, asignando automáticamente un responsable, una prioridad y un seguimiento en tiempo real desde que se reporta hasta que queda resuelto.
 
-## Landing y demo pública
+---
 
-El dominio raíz (`/`) muestra una landing pública (no requiere sesión) con:
+## 🚀 Probar la plataforma en 30 segundos (Sin instalar nada)
 
-- Botón **"Probar demo"**: inicia sesión al instante con la cuenta `demo` de solo lectura, sin formularios.
-- Registro real (`/register`) que crea la cuenta, inicia sesión automáticamente y lleva a un **onboarding** de 3 pasos (bienvenida → primer ticket guiado → listo) antes del dashboard.
+Puedes explorar Soportix inmediatamente en su versión desplegada:
 
-## Roles del sistema
+👉 **[Acceder a la Demo Pública en Vivo (soportix-1.onrender.com)](https://soportix-1.onrender.com/)**
 
-| Rol | Puede hacer |
-|---|---|
-| **Usuario final** | Crear tickets y darles seguimiento a los propios |
-| **Agente de soporte** | Ver y gestionar todos los tickets, cambiar estado, comentar, asignarse tickets |
-| **Administrador** | Todo lo del agente, más gestión de usuarios (roles/estado), categorías y reportes |
+> **Tip para evaluadores:** En la página principal, haz clic en el botón **"Probar demo"**. El sistema iniciará sesión instantáneamente con una cuenta de prueba guiada, permitiéndote recorrer la interfaz, ver el listado de tickets y el panel de control sin necesidad de registrarte ni ingresar contraseñas.
 
-El rol se asigna desde el panel de administración (`/admin/usuarios`) o desde el admin nativo de Django — el registro público siempre crea usuarios con rol `user`.
+---
 
-## Cuentas de prueba
+## 👥 ¿Quién utiliza Soportix y cómo funciona?
 
-| Rol | Usuario | Email | Contraseña |
-|---|---|---|---|
-| Administrador | `admin` | admin@soportix.com | `Admin123456` |
-| Agente de soporte | `agente` | agente@soportix.com | `Agente123456` |
-| Usuario final | `usertest` | usertest@soportix.com | `Usertest123456` |
+La plataforma adapta su interfaz y permisos según el tipo de persona que ingresa:
 
-> Son credenciales de demo para desarrollo/pruebas. Cámbialas antes de usar esta base de datos en un entorno real.
+| Tipo de Usuario | ¿Para qué lo utiliza? | Principales Beneficios |
+|---|---|---|
+| **🙋 Solicitante (Empleado / Cliente)** | Crea tickets para reportar fallas, adjunta imágenes de su problema y recibe notificaciones cuando su caso avanza. | Sabe exactamente en qué estado está su solicitud y puede calificar la atención recibida (CSAT). |
+| **🎧 Agente de Soporte** | Bandeja de entrada con todos los casos por resolver, filtros por prioridad, respuestas predefinidas y cambio de estados. | Atiende más rápido, asigna casos a compañeros y evita duplicar esfuerzos. |
+| **📊 Administrador / Coordinador** | Panel de control con gráficas en vivo, tiempos promedio de resolución, satisfacción global y gestión de usuarios. | Toma decisiones basadas en datos y detecta cuellos de botella en la atención. |
 
-Además existe una cuenta **`demo` / `Demo123456`** (rol `user`, de solo lectura) usada por el botón "Probar demo" de la landing pública: puede navegar toda la app pero tiene bloqueada cualquier escritura (crear/editar/borrar) a nivel de API, para que varios visitantes puedan probarla a la vez sin corromper los datos de ejemplo. Se crea/actualiza con:
+---
 
-```bash
-python manage.py seed_demo_user
+## ✨ Funcionalidades Clave
+
+- **Gestión visual de tickets:** Estados claros (*Nuevo*, *En progreso*, *Esperando respuesta*, *Resuelto*, *Cerrado*).
+- **Onboarding interactivo:** Guía paso a paso para usuarios nuevos que los orienta en su primer reporte.
+- **Respuestas rápidas (Canned responses):** Plantillas de respuesta para agilizar dudas comunes.
+- **Encuesta de satisfacción (CSAT):** Calificación con estrellas y comentarios al cerrar cada caso.
+- **Adjuntos seguros:** Subida de capturas y documentos de soporte en la nube.
+- **Diseño 100% responsivo:** Adaptado para computadoras, tablets y teléfonos móviles.
+
+---
+
+<br />
+
+# 🛠️ Guía Técnica y de Desarrollo *(Exclusivo para Desarrolladores)*
+
+Esta sección contiene toda la información necesaria para clonar, configurar y ejecutar el proyecto en tu entorno local.
+
+---
+
+### 🏛️ Arquitectura del Sistema
+
+Soportix está construido bajo una arquitectura desacoplada (*Frontend SPA + Backend API REST*):
+
+```
+Soportix/
+├── helpdesk-frontend/     # SPA moderna en Angular 22 (Signals, Zoneless, Material)
+│   └── src/app/
+│       ├── auth/          # Login, registro y flujo de onboarding
+│       ├── core/          # Servicios HTTP, interceptores JWT, guards y estados
+│       ├── features/      # Módulos de Landing, Dashboard, Tickets y Panel Admin
+│       └── layout/        # Navegación y componentes comunes
+│
+└── helpdesk-backend/      # API REST en Python / Django 5.2
+    └── apps/
+        ├── users/         # Control de acceso por roles (RBAC) y perfiles
+        ├── tickets/       # Ciclo de vida de incidencias, adjuntos y comentarios
+        └── dashboard/     # Endpoints agregados para reportes y métricas
 ```
 
-## Requisitos previos
+### 💻 Stack Tecnológico
 
-- Python 3.12+
-- Node.js 20+ y npm
-- PostgreSQL (opcional — sin configurar, usa SQLite automáticamente)
+- **Frontend:** Angular 22 (Standalone components, Zoneless change detection, Signals reactivos), Angular Material, Chart.js, Tipografía Switzer/Geist.
+- **Backend:** Python 3.12, Django 5.2, Django REST Framework (DRF), `django-cors-headers`, `django-filter`.
+- **Autenticación:** JWT (`djangorestframework-simplejwt`) con rotación y refresco transparente en frontend.
+- **Base de Datos:** PostgreSQL en la nube (Neon) en producción; SQLite por defecto para desarrollo local rápido.
+- **Almacenamiento de archivos:** Cloudinary (en producción para persistencia de adjuntos) o almacenamiento local.
 
-## Instalación
+---
 
-### 1. Clonar el repositorio
+### 📋 Requisitos Previos
 
+- **Node.js** v20 o superior y **npm**
+- **Python** 3.12 o superior
+- **Git**
+
+---
+
+### ⚙️ Instalación Paso a Paso
+
+#### 1. Clonar el repositorio
 ```bash
 git clone https://github.com/bleidys16/Soportix.git
 cd Soportix
 ```
 
-### 2. Backend (Django)
-
+#### 2. Configurar el Backend (Django)
 ```bash
 cd helpdesk-backend
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS/Linux
 
+# Crear y activar entorno virtual
+python -m venv .venv
+
+# En Windows:
+.venv\Scripts\activate
+# En Linux / macOS:
+# source .venv/bin/activate
+
+# Instalar dependencias
 pip install -r requirements.txt
 ```
 
-Crea un archivo `.env` dentro de `helpdesk-backend/` (no se versiona) con al menos:
-
+Crea un archivo `.env` en la raíz de `helpdesk-backend/`:
 ```env
-SECRET_KEY=una-clave-secreta-cualquiera
+SECRET_KEY=soportix-dev-secret-key-12345
 DEBUG=True
 ALLOWED_HOSTS=*
 CORS_ALLOWED_ORIGINS=http://localhost:4200
 ```
+*(Opcional: Si deseas conectar a PostgreSQL, define `DB_ENGINE=django.db.backends.postgresql`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`).*
 
-Para usar PostgreSQL en vez de SQLite, agrega además:
-
-```env
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=tu_bd
-DB_USER=tu_usuario
-DB_PASSWORD=tu_password
-DB_HOST=tu_host
-DB_PORT=5432
-```
-
-Aplica las migraciones y crea un superusuario:
-
+Ejecuta las migraciones y crea tu usuario administrador:
 ```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 3. Frontend (Angular)
+*(Opcional) Cargar el usuario para pruebas automáticas de demo:*
+```bash
+python manage.py seed_demo_user
+```
 
+#### 3. Configurar el Frontend (Angular)
+En una nueva terminal:
 ```bash
 cd helpdesk-frontend
 npm install
 ```
 
-## Levantar el proyecto
+---
 
-Con dos terminales abiertas en paralelo:
+### ▶️ Ejecución en Desarrollo
+
+Con ambas terminales activas:
 
 ```bash
-# Terminal 1 — backend (http://localhost:8000)
+# Terminal 1 — Backend (http://localhost:8000)
 cd helpdesk-backend
 .venv\Scripts\python.exe manage.py runserver
 
-# Terminal 2 — frontend (http://localhost:4200)
+# Terminal 2 — Frontend (http://localhost:4200)
 cd helpdesk-frontend
 npm start
 ```
 
-Abre **http://localhost:4200** en el navegador. El superusuario que creaste con `createsuperuser` tiene rol de administrador automáticamente.
+Abre tu navegador en **[http://localhost:4200](http://localhost:4200)**.
 
-## Variables de entorno (backend)
+---
 
-| Variable | Requerida | Descripción |
-|---|---|---|
-| `SECRET_KEY` | Sí | Clave secreta de Django |
-| `DEBUG` | No (default `True`) | Modo debug |
-| `ALLOWED_HOSTS` | No (default `*`) | Hosts permitidos, separados por coma |
-| `CORS_ALLOWED_ORIGINS` | No (default `http://localhost:4200`) | Orígenes permitidos para CORS |
-| `DB_ENGINE` | No (default SQLite) | `django.db.backends.postgresql` para usar Postgres |
-| `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | Solo si usas Postgres | Credenciales de conexión |
-| `CLOUDINARY_URL` | No | Si se define, los adjuntos de tickets se guardan en [Cloudinary](https://cloudinary.com/) en vez de disco local (necesario en Render, cuyo disco es efímero). Formato: `cloudinary://api_key:api_secret@cloud_name` |
+### 🔑 Cuentas de Prueba Preconfiguradas
 
-## Estructura del proyecto
+Para agilizar pruebas locales sin tener que registrar cuentas manuales:
 
-```
-Soportix/
-├── helpdesk-backend/     # API REST en Django
-│   └── apps/
-│       ├── users/        # Autenticación, perfiles y roles
-│       ├── tickets/      # Tickets, categorías, comentarios
-│       └── dashboard/    # Endpoints de métricas y reportes
-└── helpdesk-frontend/    # SPA en Angular
-    └── src/app/
-        ├── auth/         # Login y registro
-        ├── core/         # Servicios, guards, modelos, componentes compartidos
-        ├── features/     # Landing, onboarding, dashboard, tickets, admin, agente
-        └── layout/       # Navbar superior compartido
-```
+| Rol | Usuario | Email | Contraseña | Permisos |
+|---|---|---|---|---|
+| **Administrador** | `admin` | admin@soportix.com | `Admin123456` | Acceso total a reportes, roles y configuración |
+| **Agente de Soporte** | `agente` | agente@soportix.com | `Agente123456` | Gestión, asignación y resolución de tickets |
+| **Usuario Final** | `usertest` | usertest@soportix.com | `Usertest123456` | Creación y seguimiento de tickets propios |
+| **Cuenta Demo** | `demo` | demo@soportix.com | `Demo123456` | Modo solo lectura para la landing page |
+
+> ⚠️ **Nota de seguridad:** Estas credenciales son exclusivas para entornos de prueba y desarrollo. En producción deben cambiarse o deshabilitarse.
+
+---
+
+### 📄 Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo `LICENSE` para más información.
